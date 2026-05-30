@@ -115,6 +115,128 @@ def grafismo_mayuruna_chedebo(cor=PRIMARIA, altura=24):
     return svg_to_url(svg)
 
 
+# ─── LOGO UNIVAJA — SELO OFICIAL ──────────────────────────────────────────────
+def logo_univaja_selo(tamanho: int = 120, cor: str = None) -> str:
+    """
+    Selo oficial UNIVAJA fiel ao manual de marca:
+    - Círculo externo com texto curvado 'UNIÃO DOS POVOS INDÍGENAS / VALE DO JAVARI'
+    - Anel com greca Marubo
+    - Maloca triangular central
+    - Palmeiras laterais
+    - Jacamim (ave-símbolo) em destaque
+    - Faixa 'UNIVAJA' embaixo
+    """
+    c = cor or PRIMARIA
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" style="height:{tamanho}px;width:{tamanho}px;flex-shrink:0">
+  <defs>
+    <path id="t-cima-{tamanho}" d="M 60 200 A 140 140 0 0 1 340 200" fill="none"/>
+    <path id="t-baixo-{tamanho}" d="M 70 230 A 130 130 0 0 0 330 230" fill="none"/>
+  </defs>
+
+  <!-- Anéis principais -->
+  <circle cx="200" cy="200" r="195" fill="none" stroke="{c}" stroke-width="3"/>
+  <circle cx="200" cy="200" r="158" fill="none" stroke="{c}" stroke-width="1.5"/>
+  <circle cx="200" cy="200" r="152" fill="none" stroke="{c}" stroke-width="1"/>
+
+  <!-- Anel decorativo: greca Marubo na borda inferior -->
+  <g stroke="{c}" stroke-width="2" fill="none" stroke-linecap="square">
+    <!-- meander base -->
+    <path d="M 110 365 L 110 357 L 124 357 L 124 369 L 138 369 L 138 357 L 152 357 L 152 365
+             M 166 365 L 166 357 L 180 357 L 180 369 L 194 369 L 194 357 L 208 357 L 208 365
+             M 222 365 L 222 357 L 236 357 L 236 369 L 250 369 L 250 357 L 264 357 L 264 365
+             M 278 365 L 278 357 L 292 357 L 292 369 L 300 369"/>
+  </g>
+
+  <!-- Topo: chevrons Kanamari -->
+  <g stroke="{c}" stroke-width="2.2" fill="none">
+    <path d="M 100 30 L 108 22 L 116 30 L 124 22 L 132 30 L 140 22 L 148 30 L 156 22 L 164 30
+             L 172 22 L 180 30 L 188 22 L 196 30 L 204 22 L 212 30 L 220 22 L 228 30
+             L 236 22 L 244 30 L 252 22 L 260 30 L 268 22 L 276 30 L 284 22 L 292 30 L 300 22"/>
+  </g>
+
+  <!-- Lateral direita: hatching (triângulos Matis) -->
+  <g stroke="{c}" stroke-width="1.5" fill="none">
+    <path d="M 365 110 L 380 110 M 365 118 L 380 118 M 365 126 L 380 126
+             M 365 134 L 380 134 M 365 142 L 380 142 M 365 150 L 380 150
+             M 365 158 L 380 158 M 365 166 L 380 166 M 365 174 L 380 174
+             M 365 182 L 380 182 M 365 190 L 380 190 M 365 198 L 380 198
+             M 365 206 L 380 206 M 365 214 L 380 214 M 365 222 L 380 222
+             M 365 230 L 380 230 M 365 238 L 380 238 M 365 246 L 380 246
+             M 365 254 L 380 254 M 365 262 L 380 262 M 365 270 L 380 270
+             M 365 278 L 380 278 M 365 286 L 380 286"/>
+  </g>
+
+  <!-- Lateral esquerda: triângulos invertidos -->
+  <g fill="{c}">
+    <polygon points="20,110 30,120 20,130"/>
+    <polygon points="20,140 30,150 20,160"/>
+    <polygon points="20,170 30,180 20,190"/>
+    <polygon points="20,200 30,210 20,220"/>
+    <polygon points="20,230 30,240 20,250"/>
+    <polygon points="20,260 30,270 20,280"/>
+  </g>
+
+  <!-- Pontos separadores laterais (entre texto cima/baixo) -->
+  <circle cx="50" cy="200" r="3" fill="{c}"/>
+  <circle cx="350" cy="200" r="3" fill="{c}"/>
+
+  <!-- Maloca grande (triângulo + base) -->
+  <path d="M 200 90 L 290 215 L 110 215 Z" fill="{c}"/>
+  <ellipse cx="200" cy="240" rx="98" ry="38" fill="{c}"/>
+
+  <!-- Palmeiras silhueta verde escuro -->
+  <g fill="{VERDE_PRETO}">
+    <!-- esquerda -->
+    <rect x="148" y="155" width="2.5" height="55" fill="{VERDE_PRETO}"/>
+    <path d="M 149 160 Q 130 148 120 152 Q 132 158 149 160 Z" fill="{VERDE_PRETO}"/>
+    <path d="M 149 165 Q 130 162 118 167 Q 135 168 149 165 Z" fill="{VERDE_PRETO}"/>
+    <path d="M 149 170 Q 132 175 122 184 Q 138 175 149 170 Z" fill="{VERDE_PRETO}"/>
+    <path d="M 149 158 Q 160 145 175 145 Q 162 155 149 158 Z" fill="{VERDE_PRETO}"/>
+    <path d="M 149 164 Q 162 162 177 165 Q 163 168 149 164 Z" fill="{VERDE_PRETO}"/>
+    <path d="M 149 170 Q 162 174 175 184 Q 158 175 149 170 Z" fill="{VERDE_PRETO}"/>
+    <!-- direita -->
+    <rect x="250" y="155" width="2.5" height="55" fill="{VERDE_PRETO}"/>
+    <path d="M 251 160 Q 270 148 280 152 Q 268 158 251 160 Z" fill="{VERDE_PRETO}"/>
+    <path d="M 251 165 Q 270 162 282 167 Q 265 168 251 165 Z" fill="{VERDE_PRETO}"/>
+    <path d="M 251 170 Q 268 175 278 184 Q 262 175 251 170 Z" fill="{VERDE_PRETO}"/>
+    <path d="M 251 158 Q 240 145 225 145 Q 238 155 251 158 Z" fill="{VERDE_PRETO}"/>
+    <path d="M 251 164 Q 238 162 223 165 Q 237 168 251 164 Z" fill="{VERDE_PRETO}"/>
+    <path d="M 251 170 Q 238 174 225 184 Q 242 175 251 170 Z" fill="{VERDE_PRETO}"/>
+  </g>
+
+  <!-- Jacamim (silhueta da ave) -->
+  <g fill="{VERDE_PRETO}">
+    <ellipse cx="210" cy="195" rx="22" ry="14"/>
+    <ellipse cx="220" cy="172" rx="6" ry="18" transform="rotate(10 220 172)"/>
+    <circle cx="225" cy="155" r="7"/>
+    <polygon points="232,153 244,151 232,158"/>
+    <line x1="200" y1="208" x2="198" y2="220" stroke="{VERDE_PRETO}" stroke-width="2.5"/>
+    <line x1="215" y1="208" x2="215" y2="220" stroke="{VERDE_PRETO}" stroke-width="2.5"/>
+    <path d="M 188 195 Q 178 188 170 192 Q 180 200 188 195 Z"/>
+  </g>
+
+  <!-- Texto UNIVAJA na faixa -->
+  <text x="200" y="252" font-family="Battambang, Archivo, serif" font-size="38" font-weight="700"
+        fill="white" text-anchor="middle" letter-spacing="4">UNIVAJA</text>
+
+  <!-- Texto curvado superior -->
+  <text font-family="Battambang, Archivo, serif" font-size="22" font-weight="700"
+        fill="{c}" letter-spacing="5">
+    <textPath href="#t-cima-{tamanho}" startOffset="50%" text-anchor="middle">
+      UNIÃO DOS POVOS INDÍGENAS
+    </textPath>
+  </text>
+
+  <!-- Texto curvado inferior -->
+  <text font-family="Battambang, Archivo, serif" font-size="22" font-weight="700"
+        fill="{c}" letter-spacing="5">
+    <textPath href="#t-baixo-{tamanho}" startOffset="50%" text-anchor="middle">
+      VALE DO JAVARI
+    </textPath>
+  </text>
+</svg>"""
+
+
 # ─── LOGO UNIVAJA ─────────────────────────────────────────────────────────────
 def logo_svg(variante: str = "completa", cor_simbolo: str = None, cor_texto: str = None,
              altura: int = 60) -> str:
@@ -919,24 +1041,14 @@ h4, h5, h6 {{
 [data-testid="stSidebar"] .stCheckbox label {{ color: {CREME} !important; font-size: 13px; }}
 [data-testid="stSidebar"] hr {{ border-color: {VERDE_ESC}; }}
 
-/* Logo na sidebar */
+/* Logo na sidebar — selo UNIVAJA oficial */
 .sidebar-logo {{
     display: flex; flex-direction: column; align-items: center;
-    padding: 18px 8px 14px;
-    border-radius: 12px;
-    background: rgba(220,54,55,.12);
+    padding: 12px 8px;
+    border-radius: 14px;
+    background: white;
     margin-bottom: 14px;
-    border: 1px solid {VERDE_ESC};
-}}
-.sidebar-logo-nome {{
-    font-family: 'Battambang', 'Archivo', serif;
-    font-weight: 700; font-size: 22px;
-    color: white; letter-spacing: 3px; margin-top: 8px; line-height: 1;
-}}
-.sidebar-logo-sub {{
-    font-family: 'Archivo', sans-serif;
-    font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
-    color: {VERDE_CLARO}; margin-top: 4px; opacity: .9; text-align: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,.15);
 }}
 
 /* Inputs */
@@ -955,32 +1067,15 @@ h4, h5, h6 {{
 
 
 def header(titulo: str, sub: str = "", meta: str = "Uso interno · 2026") -> str:
-    """Header padrão UNIVAJA com logo + grafismos Marubo + pontos Kanamari.
-
-    O parâmetro `titulo` vira o nome do APP (após a logo UNIVAJA),
-    para deixar claro qual ferramenta está em uso.
-    """
-    # Logo embutida em branco para contraste no header vermelho
-    logo_simbolo_branco = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" style="height:56px;width:56px;flex-shrink:0">
-        <circle cx="32" cy="32" r="30" fill="white"/>
-        <circle cx="32" cy="32" r="30" fill="none" stroke="{VERMELHO_ESC}" stroke-width="1.5"/>
-        <path d="M32 12 L52 38 L12 38 Z" fill="{PRIMARIA}"/>
-        <rect x="10" y="38" width="44" height="2.5" fill="{VERMELHO_ESC}"/>
-        <rect x="10" y="40.5" width="44" height="13" fill="{VERDE_PRETO}"/>
-        <path d="M14 50 L14 44 L18 44 L18 48 L22 48 L22 44 L26 44 L26 50
-                 M30 50 L30 44 L34 44 L34 48 L38 48 L38 44 L42 44 L42 50
-                 M46 50 L46 44 L50 44 L50 48"
-              stroke="white" stroke-width="1.3" fill="none" stroke-linecap="square"/>
-        <circle cx="32" cy="22" r="2.2" fill="{PRIMARIA}"/>
-    </svg>"""
+    """Header com selo UNIVAJA oficial + nome do app."""
+    # Selo branco para contraste no header vermelho
+    selo = logo_univaja_selo(tamanho=110, cor="white")
 
     return f"""
 <div class="header-univaja">
-    <div class="header-univaja-conteudo" style="display:flex;align-items:center;gap:16px">
-        {logo_simbolo_branco}
+    <div class="header-univaja-conteudo" style="display:flex;align-items:center;gap:22px">
+        <div style="background:rgba(255,255,255,.08);border-radius:50%;padding:6px;flex-shrink:0">{selo}</div>
         <div>
-            <div class="header-univaja-titulo">UNIVAJA</div>
-            <div class="header-univaja-sub" style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;opacity:.85">União dos Povos do Vale do Javari</div>
             <div class="header-univaja-app">{titulo}</div>
             <div class="header-univaja-sub">{sub}</div>
         </div>
@@ -1063,23 +1158,9 @@ def eh_pauta_sensivel(*textos) -> bool:
 
 
 def sidebar_logo() -> str:
-    """Logo UNIVAJA estilizada para colocar no topo da sidebar."""
-    simbolo = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" style="height:64px;width:64px">
-        <circle cx="32" cy="32" r="30" fill="white"/>
-        <circle cx="32" cy="32" r="30" fill="none" stroke="{VERMELHO_ESC}" stroke-width="1.5"/>
-        <path d="M32 12 L52 38 L12 38 Z" fill="{PRIMARIA}"/>
-        <rect x="10" y="38" width="44" height="2.5" fill="{VERMELHO_ESC}"/>
-        <rect x="10" y="40.5" width="44" height="13" fill="{VERDE_PRETO}"/>
-        <path d="M14 50 L14 44 L18 44 L18 48 L22 48 L22 44 L26 44 L26 50
-                 M30 50 L30 44 L34 44 L34 48 L38 48 L38 44 L42 44 L42 50
-                 M46 50 L46 44 L50 44 L50 48"
-              stroke="white" stroke-width="1.3" fill="none" stroke-linecap="square"/>
-        <circle cx="32" cy="22" r="2.2" fill="{PRIMARIA}"/>
-    </svg>"""
+    """Selo UNIVAJA oficial na sidebar."""
     return f"""<div class="sidebar-logo">
-        {simbolo}
-        <div class="sidebar-logo-nome">UNIVAJA</div>
-        <div class="sidebar-logo-sub">União dos Povos do<br>Vale do Javari</div>
+        {logo_univaja_selo(tamanho=140, cor=PRIMARIA)}
     </div>"""
 
 

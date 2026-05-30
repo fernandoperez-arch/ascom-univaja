@@ -929,61 +929,64 @@ def gerar_pdf(pautas: list, titulo_reuniao: str, periodo_descr: str, observacoes
         pdf.line(x+step/2, 8, x+step/2, 5); pdf.line(x+step/2, 5, x+step, 5)
         x += step
 
-    # ── LOGO UNIVAJA — desenhada com primitives (compatível com fpdf2 e PyFPDF) ──
-    cx, cy = 22, 22
+    # ── LOGO UNIVAJA — selo oficial simplificado ──
+    cx, cy = 24, 22
+    R = 14
 
-    # Círculo branco principal
+    # Círculo branco com borda
     pdf.set_fill_color(255, 255, 255)
     pdf.set_draw_color(*hex_rgb(VERMELHO_ESC))
-    pdf.set_line_width(0.4)
-    raio = 12
-    pdf.ellipse(cx-raio, cy-raio, raio*2, raio*2, "FD")
+    pdf.set_line_width(0.5)
+    pdf.ellipse(cx-R, cy-R, R*2, R*2, "FD")
+    pdf.set_draw_color(*hex_rgb(PRIMARIA))
+    pdf.set_line_width(0.25)
+    pdf.ellipse(cx-(R-2), cy-(R-2), (R-2)*2, (R-2)*2, "D")
 
-    # Maloca como pirâmide vermelha (retângulos empilhados)
+    # Maloca triangular
     pdf.set_fill_color(*hex_rgb(PRIMARIA))
-    pdf.rect(cx-1.0, cy-8, 2.0, 1.8, "F")
-    pdf.rect(cx-2.4, cy-6.2, 4.8, 1.8, "F")
-    pdf.rect(cx-3.8, cy-4.4, 7.6, 1.8, "F")
-    pdf.rect(cx-5.2, cy-2.6, 10.4, 1.8, "F")
-    pdf.rect(cx-6.6, cy-0.8, 13.2, 2.0, "F")
+    pdf.rect(cx-0.5, cy-7, 1, 1.2, "F")
+    pdf.rect(cx-1.8, cy-5.8, 3.6, 1.2, "F")
+    pdf.rect(cx-3.1, cy-4.6, 6.2, 1.2, "F")
+    pdf.rect(cx-4.4, cy-3.4, 8.8, 1.2, "F")
+    pdf.rect(cx-5.7, cy-2.2, 11.4, 1.4, "F")
 
-    # Solo vermelho escuro (faixa)
-    pdf.set_fill_color(*hex_rgb(VERMELHO_ESC))
-    pdf.rect(cx-7.5, cy+1.4, 15, 0.8, "F")
+    # Faixa UNIVAJA
+    pdf.rect(cx-7, cy-0.6, 14, 4, "F")
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("helvetica", "B", 4.5)
+    pdf.set_xy(cx-6, cy)
+    pdf.cell(12, 3, "UNIVAJA", align="C")
 
-    # Base verde escuro com greca Marubo
-    pdf.set_fill_color(*hex_rgb(VERDE_PRETO))
-    pdf.rect(cx-7.5, cy+2.2, 15, 5.0, "F")
-
-    # Greca Marubo branca dentro da base
-    pdf.set_draw_color(255, 255, 255)
-    pdf.set_line_width(0.35)
-    bx = cx - 6.5
+    # Chevrons topo + greca base + pontos laterais
+    pdf.set_draw_color(*hex_rgb(PRIMARIA))
+    pdf.set_line_width(0.3)
+    for dx in [-7, -5, -3, -1, 1, 3, 5]:
+        pdf.line(cx+dx, cy-R+1, cx+dx+1, cy-R+2.2)
+        pdf.line(cx+dx+1, cy-R+2.2, cx+dx+2, cy-R+1)
+    bx = cx - 6
     for _ in range(3):
-        pdf.line(bx, cy+6.5, bx, cy+3.5)
-        pdf.line(bx, cy+3.5, bx+1.6, cy+3.5)
-        pdf.line(bx+1.6, cy+3.5, bx+1.6, cy+5.5)
-        pdf.line(bx+1.6, cy+5.5, bx+3.2, cy+5.5)
-        pdf.line(bx+3.2, cy+5.5, bx+3.2, cy+3.5)
+        pdf.line(bx, cy+R-2, bx, cy+R-3.5)
+        pdf.line(bx, cy+R-3.5, bx+1.5, cy+R-3.5)
+        pdf.line(bx+1.5, cy+R-3.5, bx+1.5, cy+R-2)
+        pdf.line(bx+1.5, cy+R-2, bx+3, cy+R-2)
         bx += 4.5
-
-    # Ponto vermelho topo (jacamim)
     pdf.set_fill_color(*hex_rgb(PRIMARIA))
-    pdf.ellipse(cx-1.0, cy-10.5, 2.0, 2.0, "F")
+    pdf.ellipse(cx-R+0.5, cy-0.4, 0.8, 0.8, "F")
+    pdf.ellipse(cx+R-1.3, cy-0.4, 0.8, 0.8, "F")
 
     # Texto ao lado da logo
     pdf.set_text_color(255, 255, 255)
     pdf.set_font("helvetica", "B", 22)
-    pdf.set_xy(40, 11)
+    pdf.set_xy(45, 10)
     pdf.cell(0, 8, latin("UNIVAJA"), ln=1)
     pdf.set_font("helvetica", "", 9)
-    pdf.set_x(40)
-    pdf.cell(0, 4, latin("UNIAO DOS POVOS DO VALE DO JAVARI"), ln=1)
+    pdf.set_x(45)
+    pdf.cell(0, 4, latin("UNIAO DOS POVOS INDIGENAS - VALE DO JAVARI"), ln=1)
     pdf.set_font("helvetica", "B", 11)
-    pdf.set_x(40)
+    pdf.set_x(45)
     pdf.cell(0, 5, latin("Planejamento editorial - ASCOM"), ln=1)
     pdf.set_font("helvetica", "I", 8)
-    pdf.set_x(40)
+    pdf.set_x(45)
     pdf.cell(0, 4, latin(f"Gerado em {datetime.now().strftime('%d/%m/%Y %H:%M')}"), ln=1)
 
     # Pontos brancos Kanamari na base do header

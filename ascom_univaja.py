@@ -1064,36 +1064,71 @@ def gerar_pdf_agenda(pautas, programacao, datas_proximas, titulo, observacoes):
         pdf.line(x+step/2, 8, x+step/2, 5); pdf.line(x+step/2, 5, x+step, 5)
         x += step
 
-    # Logo UNIVAJA
-    cx, cy = 22, 22
+    # Logo UNIVAJA — selo oficial simplificado para PDF
+    cx, cy = 24, 22
+    R = 14  # raio do selo
+
+    # Círculo externo branco com borda vermelha escura
     pdf.set_fill_color(255, 255, 255)
     pdf.set_draw_color(*hex_rgb(VERMELHO_ESC))
-    pdf.ellipse(cx-12, cy-12, 24, 24, "FD")
+    pdf.set_line_width(0.5)
+    pdf.ellipse(cx-R, cy-R, R*2, R*2, "FD")
+
+    # Anel interno
+    pdf.set_draw_color(*hex_rgb(PRIMARIA))
+    pdf.set_line_width(0.25)
+    pdf.ellipse(cx-(R-2), cy-(R-2), (R-2)*2, (R-2)*2, "D")
+
+    # Maloca triangular vermelha (pirâmide stepped)
     pdf.set_fill_color(*hex_rgb(PRIMARIA))
-    pdf.rect(cx-1.0, cy-8, 2.0, 1.8, "F")
-    pdf.rect(cx-2.4, cy-6.2, 4.8, 1.8, "F")
-    pdf.rect(cx-3.8, cy-4.4, 7.6, 1.8, "F")
-    pdf.rect(cx-5.2, cy-2.6, 10.4, 1.8, "F")
-    pdf.rect(cx-6.6, cy-0.8, 13.2, 2.0, "F")
-    pdf.set_fill_color(*hex_rgb(VERMELHO_ESC))
-    pdf.rect(cx-7.5, cy+1.4, 15, 0.8, "F")
-    pdf.set_fill_color(*hex_rgb(VERDE_PRETO))
-    pdf.rect(cx-7.5, cy+2.2, 15, 5.0, "F")
+    pdf.rect(cx-0.5, cy-7, 1, 1.2, "F")
+    pdf.rect(cx-1.8, cy-5.8, 3.6, 1.2, "F")
+    pdf.rect(cx-3.1, cy-4.6, 6.2, 1.2, "F")
+    pdf.rect(cx-4.4, cy-3.4, 8.8, 1.2, "F")
+    pdf.rect(cx-5.7, cy-2.2, 11.4, 1.4, "F")
+
+    # Base/faixa UNIVAJA
+    pdf.rect(cx-7, cy-0.6, 14, 4, "F")
+
+    # Texto UNIVAJA na faixa (branco)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("helvetica", "B", 4.5)
+    pdf.set_xy(cx-6, cy)
+    pdf.cell(12, 3, "UNIVAJA", align="C")
+
+    # Pontos laterais
     pdf.set_fill_color(*hex_rgb(PRIMARIA))
-    pdf.ellipse(cx-1.0, cy-10.5, 2.0, 2.0, "F")
+    pdf.ellipse(cx-R+0.5, cy-0.4, 0.8, 0.8, "F")
+    pdf.ellipse(cx+R-1.3, cy-0.4, 0.8, 0.8, "F")
+
+    # Pequenos chevrons no topo do selo
+    pdf.set_draw_color(*hex_rgb(PRIMARIA))
+    pdf.set_line_width(0.3)
+    for dx in [-7, -5, -3, -1, 1, 3, 5]:
+        pdf.line(cx+dx, cy-R+1, cx+dx+1, cy-R+2.2)
+        pdf.line(cx+dx+1, cy-R+2.2, cx+dx+2, cy-R+1)
+
+    # Greca Marubo na base do selo
+    bx = cx - 6
+    for _ in range(3):
+        pdf.line(bx, cy+R-2, bx, cy+R-3.5)
+        pdf.line(bx, cy+R-3.5, bx+1.5, cy+R-3.5)
+        pdf.line(bx+1.5, cy+R-3.5, bx+1.5, cy+R-2)
+        pdf.line(bx+1.5, cy+R-2, bx+3, cy+R-2)
+        bx += 4.5
 
     pdf.set_text_color(255, 255, 255)
     pdf.set_font("helvetica", "B", 22)
-    pdf.set_xy(40, 11)
+    pdf.set_xy(45, 10)
     pdf.cell(0, 8, latin("UNIVAJA"), ln=1)
     pdf.set_font("helvetica", "", 9)
-    pdf.set_x(40)
-    pdf.cell(0, 4, latin("UNIAO DOS POVOS DO VALE DO JAVARI"), ln=1)
+    pdf.set_x(45)
+    pdf.cell(0, 4, latin("UNIAO DOS POVOS INDIGENAS - VALE DO JAVARI"), ln=1)
     pdf.set_font("helvetica", "B", 11)
-    pdf.set_x(40)
+    pdf.set_x(45)
     pdf.cell(0, 5, latin("ASCOM - Agenda para aprovacao"), ln=1)
     pdf.set_font("helvetica", "I", 8)
-    pdf.set_x(40)
+    pdf.set_x(45)
     pdf.cell(0, 4, latin(f"Gerado em {datetime.now().strftime('%d/%m/%Y %H:%M')}"), ln=1)
 
     pdf.set_fill_color(255, 255, 255)
@@ -1334,24 +1369,43 @@ def gerar_pdf_agenda(pautas, programacao, datas_proximas, titulo, observacoes):
         pdf.ellipse(bx+6, pdf.get_y(), 1.2, 1.2, "F")
         bx += 12
 
-    # Rodapé com logo mini
-    pdf.set_y(-18)
+    # Rodapé vermelho UNIVAJA com mini-selo
+    pdf.set_y(-20)
+    y_rod = pdf.get_y()
     pdf.set_fill_color(*hex_rgb(PRIMARIA))
-    pdf.rect(0, pdf.get_y(), 210, 18, "F")
-    # Maloca mini no rodapé
-    pdf.set_fill_color(255, 255, 255)
-    pdf.rect(8, pdf.get_y() + 6, 1.5, 1.5, "F")
-    pdf.rect(7, pdf.get_y() + 7.5, 3.5, 1.5, "F")
-    pdf.rect(6, pdf.get_y() + 9, 5.5, 1.5, "F")
-    pdf.rect(5, pdf.get_y() + 10.5, 7.5, 2, "F")
+    pdf.rect(0, y_rod, 210, 20, "F")
 
-    pdf.set_xy(16, pdf.get_y() + 5)
+    # Mini selo no canto: círculo branco com maloca
+    cx_r, cy_r = 12, y_rod + 10
+    pdf.set_fill_color(255, 255, 255)
+    pdf.set_draw_color(255, 255, 255)
+    pdf.ellipse(cx_r-7, cy_r-7, 14, 14, "F")
+    pdf.set_fill_color(*hex_rgb(PRIMARIA))
+    pdf.rect(cx_r-0.3, cy_r-4, 0.6, 0.8, "F")
+    pdf.rect(cx_r-1, cy_r-3.2, 2, 0.8, "F")
+    pdf.rect(cx_r-1.7, cy_r-2.4, 3.4, 0.8, "F")
+    pdf.rect(cx_r-2.4, cy_r-1.6, 4.8, 0.8, "F")
+    pdf.rect(cx_r-3.5, cy_r-0.4, 7, 2.5, "F")
+
+    # Texto rodapé
+    pdf.set_xy(22, y_rod + 4)
     pdf.set_text_color(255, 255, 255)
-    pdf.set_font("helvetica", "B", 9)
-    pdf.cell(0, 4, latin("UNIVAJA - Uniao dos Povos do Vale do Javari"), ln=1)
-    pdf.set_x(16)
+    pdf.set_font("helvetica", "B", 10)
+    pdf.cell(0, 4.5, latin("UNIVAJA"), ln=1)
+    pdf.set_x(22)
+    pdf.set_font("helvetica", "", 8)
+    pdf.cell(0, 4, latin("Uniao dos Povos Indigenas do Vale do Javari"), ln=1)
+    pdf.set_x(22)
     pdf.set_font("helvetica", "I", 7)
     pdf.cell(0, 3.5, latin("ASCOM 2026 - documento de uso interno"), ln=1)
+
+    # Pontos Kanamari brancos do lado direito
+    pdf.set_fill_color(255, 255, 255)
+    bx = 150
+    while bx < 200:
+        pdf.ellipse(bx, y_rod + 9, 0.8, 0.8, "F")
+        pdf.ellipse(bx+4, y_rod + 9, 0.8, 0.8, "F")
+        bx += 10
 
     result = pdf.output(dest="S")
     if isinstance(result, str):
