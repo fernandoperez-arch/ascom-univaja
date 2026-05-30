@@ -1,4 +1,13 @@
+"""
+ASCOM UNIVAJA — Plataforma de fluxos integrados de comunicação
+Identidade visual: Manual de Marca UNIVAJA (cores + grafismos dos povos do Vale do Javari).
+"""
+
 import streamlit as st
+from univaja_brand import (
+    css_global, header, divisor, section_title,
+    PRIMARIA, VERMELHO_ESC, VERMELHO_MED, VERDE, VERDE_ESC, VERDE_PRETO, CINZA,
+)
 
 # ─── Configuração da página ────────────────────────────────────────────────────
 st.set_page_config(
@@ -8,250 +17,17 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# ─── CSS Global ───────────────────────────────────────────────────────────────
-st.markdown("""
-<style>
-/* Fonte e base — Archivo (Google Fonts) como fallback da Croog Pro */
-@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
-html, body, [class*="css"] { font-family: 'Archivo', 'Segoe UI', Arial, sans-serif; }
-
-/* Esconde rodapé e menu do Streamlit */
-#MainMenu { visibility: hidden; }
-footer    { visibility: hidden; }
-header    { visibility: hidden; }
-
-/* Abas */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 4px;
-    border-bottom: 2px solid #DC3637;
-    padding-bottom: 0;
-}
-.stTabs [data-baseweb="tab"] {
-    background: #f5f5f5;
-    border-radius: 8px 8px 0 0;
-    padding: 8px 20px;
-    font-weight: 500;
-    font-size: 14px;
-    color: #494949;
-    border: 1px solid #ddd;
-    border-bottom: none;
-}
-.stTabs [aria-selected="true"] {
-    background: #DC3637 !important;
-    color: white !important;
-    border-color: #DC3637 !important;
-}
-
-/* Cards */
-.card {
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    padding: 16px 20px;
-    margin-bottom: 12px;
-}
-.card-vermelho { border-left: 5px solid #DC3637; }
-.card-verde    { border-left: 5px solid #547658; }
-.card-roxo     { border-left: 5px solid #384E3A; }
-.card-teal     { border-left: 5px solid #547658; }
-.card-laranja  { border-left: 5px solid #B6352E; }
-.card-cinza    { border-left: 5px solid #494949; }
-.card-coral    { border-left: 5px solid #780B0B; }
-.card-azul     { border-left: 5px solid #1F2A21; }
-
-/* Badges */
-.badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    margin-bottom: 6px;
-}
-.badge-seg    { background: #f0f5f1; color: #1F2A21; border: 1px solid #99E19E; }
-.badge-prod   { background: #f0f5f1; color: #384E3A; border: 1px solid #547658; }
-.badge-pol    { background: #fdf6e3; color: #780B0B; border: 1px solid #E58D8D; }
-.badge-perm   { background: #f0f5f1; color: #384E3A; border: 1px solid #99E19E; }
-.badge-local  { background: #fce8e8; color: #780B0B; border: 1px solid #E58D8D; }
-.badge-int    { background: #f0f5f1; color: #1F2A21; border: 1px solid #547658; }
-.badge-den    { background: #fce8e8; color: #780B0B; border: 1px solid #DC3637; }
-.badge-pos    { background: #f0f5f1; color: #547658; border: 1px solid #99E19E; }
-
-/* Tabelas */
-.tabela-fluxo {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    margin-bottom: 16px;
-}
-.tabela-fluxo th {
-    padding: 10px 12px;
-    text-align: left;
-    color: white;
-    font-weight: 600;
-    font-size: 13px;
-}
-.tabela-fluxo td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #e5e7eb;
-    vertical-align: top;
-    font-size: 13px;
-    line-height: 1.5;
-}
-.tabela-fluxo tr:last-child td { border-bottom: none; }
-.tabela-fluxo tr:nth-child(even) td { background: #fafafa; }
-
-/* Etapa badge */
-.etapa {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    font-weight: 700;
-    font-size: 13px;
-    color: white;
-}
-
-/* Alerta */
-.alerta {
-    background: #fdf6e3;
-    border: 1px solid #B6352E;
-    border-left: 5px solid #B6352E;
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 13px;
-    color: #780B0B;
-    margin: 12px 0;
-}
-.alerta-vermelho {
-    background: #fce8e8;
-    border: 1px solid #DC3637;
-    border-left: 5px solid #780B0B;
-    color: #780B0B;
-}
-.alerta-verde {
-    background: #f0f5f1;
-    border: 1px solid #547658;
-    border-left: 5px solid #547658;
-    color: #1F2A21;
-}
-
-/* Termo pill */
-.termo-pill {
-    display: inline-block;
-    background: #f3f4f6;
-    border: 1px solid #d1d5db;
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 12px;
-    margin: 3px;
-    color: #374151;
-}
-
-/* Header UNIVAJA */
-.header-univaja {
-    background: #DC3637;
-    color: white;
-    padding: 18px 24px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* Glossário */
-.gloss-card {
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-}
-.gloss-titulo {
-    font-weight: 700;
-    color: #DC3637;
-    font-size: 14px;
-    margin-bottom: 4px;
-}
-.gloss-desc { font-size: 13px; color: #374151; line-height: 1.5; }
-.gloss-canal {
-    margin-top: 6px;
-    font-size: 11px;
-    color: white;
-    background: #494949;
-    padding: 2px 8px;
-    border-radius: 10px;
-    display: inline-block;
-}
-
-/* Quem faz o quê */
-.pessoa-card {
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-bottom: 8px;
-}
-.pessoa-nome { font-weight: 700; font-size: 14px; color: #1e293b; margin-bottom: 4px; }
-.pessoa-faz  { font-size: 13px; color: #374151; line-height: 1.5; }
-.pessoa-nao  { font-size: 12px; color: #991b1b; margin-top: 5px; line-height: 1.4; }
-
-/* Links de busca */
-.link-busca {
-    display: block;
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 12px 16px;
-    text-decoration: none;
-    color: #1e293b;
-    margin-bottom: 8px;
-    transition: border-color 0.15s;
-}
-.link-busca:hover { border-color: #DC3637; }
-.link-busca-titulo { font-weight: 600; font-size: 14px; color: #DC3637; }
-.link-busca-desc   { font-size: 12px; color: #6b7280; margin-top: 3px; }
-
-/* Decisão política */
-.decisao-col {
-    border-radius: 8px;
-    padding: 14px 16px;
-    font-size: 13px;
-    line-height: 1.5;
-}
-.decisao-pub    { background: #f0f5f1; border: 1px solid #547658; color: #1F2A21; }
-.decisao-wait   { background: #fdf6e3; border: 1px solid #B6352E; color: #780B0B; }
-.decisao-silent { background: #fce8e8; border: 1px solid #DC3637; color: #780B0B; }
-
-/* Calendário */
-.cal-dia {
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 12px 14px;
-    margin-bottom: 8px;
-}
-.cal-data  { font-weight: 700; font-size: 13px; color: #DC3637; }
-.cal-pauta { font-size: 13px; color: #374151; line-height: 1.5; margin-top: 4px; }
-.cal-resp  { font-size: 11px; color: #6b7280; margin-top: 4px; }
-</style>
-""", unsafe_allow_html=True)
+st.markdown(css_global(), unsafe_allow_html=True)
 
 # ─── Header ───────────────────────────────────────────────────────────────────
-st.markdown("""
-<div class="header-univaja">
-    <div>
-        <div style="font-size:22px;font-weight:700;letter-spacing:1px">🌿 UNIVAJA</div>
-        <div style="font-size:13px;opacity:.85;margin-top:2px">Assessoria de Comunicação — ASCOM</div>
-    </div>
-    <div style="font-size:12px;opacity:.75;text-align:right">
-        Uso interno · 2026
-    </div>
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    header(
+        "UNIVAJA",
+        "Assessoria de Comunicação — ASCOM",
+        "Uso interno · 2026",
+    ),
+    unsafe_allow_html=True,
+)
 
 # ─── Abas ─────────────────────────────────────────────────────────────────────
 aba1, aba2, aba3, aba4, aba5 = st.tabs([
@@ -268,21 +44,17 @@ aba1, aba2, aba3, aba4, aba5 = st.tabs([
 # ══════════════════════════════════════════════════════════════════════════════
 with aba1:
 
-    st.markdown("### Fluxos integrados de comunicação")
+    st.markdown(section_title("Fluxos integrados de comunicação", "padrao"), unsafe_allow_html=True)
     st.caption("Todos os fluxos da ASCOM em um só lugar. Use antes da reunião de segunda e durante a produção.")
 
     # ── Fluxo 1: Ciclo semanal ──────────────────────────────────────────────
-    st.markdown("---")
-    st.markdown("""
-    <div style="background:#1F2A21;color:white;padding:8px 16px;border-radius:8px;font-weight:600;font-size:14px;margin-bottom:12px">
-        ◆ Fluxo 1 — Ciclo semanal de trabalho
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(divisor("marubo"), unsafe_allow_html=True)
+    st.markdown(section_title("Fluxo 1 — Ciclo semanal de trabalho", "padrao"), unsafe_allow_html=True)
 
-    st.markdown("""
+    st.markdown(f"""
     <table class="tabela-fluxo">
         <thead>
-            <tr style="background:#1F2A21">
+            <tr>
                 <th style="width:60px">Etapa</th>
                 <th style="width:140px">Quando</th>
                 <th>O que acontece</th>
@@ -291,25 +63,25 @@ with aba1:
         </thead>
         <tbody>
             <tr>
-                <td><span class="etapa" style="background:#1F2A21">1</span></td>
+                <td><span class="etapa" style="background:{VERDE_PRETO}">1</span></td>
                 <td><strong>Segunda-feira</strong></td>
                 <td>Reunião ASCOM: seleção de pautas da semana e divisão de tarefas por tipo de material (card, vídeo, boletim). Cada comunicador sai com uma responsabilidade clara.</td>
                 <td>14 comunicadores + pontos focais</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#1F2A21">2</span></td>
+                <td><span class="etapa" style="background:{VERDE_PRETO}">2</span></td>
                 <td><strong>Terça – Quarta</strong></td>
                 <td>Produção do material: roteiros, cards, textos e vídeos conforme a divisão da reunião. Designer cria os cards seguindo o manual de marca.</td>
                 <td>Comunicadores designados + designer</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#1F2A21">3</span></td>
+                <td><span class="etapa" style="background:{VERDE_PRETO}">3</span></td>
                 <td><strong>Quinta – Sexta</strong></td>
                 <td>Envio ao grupo ASCOM para aprovação. Após aval da coordenação, TUMI ou DÉBORA publicam nas redes sociais.</td>
                 <td>Ponto focal + coordenação + TUMI/DÉBORA</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#888">↺</span></td>
+                <td><span class="etapa" style="background:{CINZA}">↺</span></td>
                 <td><strong>Segunda seguinte</strong></td>
                 <td>Nova semana começa. O ciclo se reinicia com nova reunião de pauta.</td>
                 <td>Toda a equipe ASCOM</td>
@@ -319,17 +91,13 @@ with aba1:
     """, unsafe_allow_html=True)
 
     # ── Fluxo 2A: Card ──────────────────────────────────────────────────────
-    st.markdown("---")
-    st.markdown("""
-    <div style="background:#547658;color:white;padding:8px 16px;border-radius:8px;font-weight:600;font-size:14px;margin-bottom:12px">
-        ◆ Fluxo 2A — Publicação: Card / Imagem
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(divisor("zig"), unsafe_allow_html=True)
+    st.markdown(section_title("Fluxo 2A — Publicação: Card / Imagem", "verde"), unsafe_allow_html=True)
 
-    st.markdown("""
+    st.markdown(f"""
     <table class="tabela-fluxo">
         <thead>
-            <tr style="background:#547658">
+            <tr>
                 <th style="width:60px">Etapa</th>
                 <th style="width:200px">Responsável</th>
                 <th>Ação</th>
@@ -338,37 +106,37 @@ with aba1:
         </thead>
         <tbody>
             <tr>
-                <td><span class="etapa" style="background:#547658">1</span></td>
+                <td><span class="etapa" style="background:{VERDE}">1</span></td>
                 <td><strong>Comunicador designado</strong></td>
                 <td>Propõe o tema na reunião de segunda. Explica o que o card deve comunicar, qual o objetivo e para qual público.</td>
                 <td>Proposta oral ou escrita no grupo</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#547658">2</span></td>
+                <td><span class="etapa" style="background:{VERDE}">2</span></td>
                 <td><strong>Comunicador → Designer</strong></td>
                 <td>Envia briefing escrito ao designer com: tema, texto principal, informações de destaque e referências visuais (se houver). O briefing deve ser claro o suficiente para o designer trabalhar sem precisar perguntar.</td>
                 <td>Briefing no grupo ASCOM</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#547658">3</span></td>
+                <td><span class="etapa" style="background:{VERDE}">3</span></td>
                 <td><strong>Designer</strong></td>
-                <td>Cria o card seguindo o manual de marca: cores, fontes, logos e proporções corretas. Não inventa elementos novos sem consultar o comunicador responsável.</td>
+                <td>Cria o card seguindo o manual de marca: cores, fontes, logos, grafismos e proporções corretas. Não inventa elementos novos sem consultar o comunicador responsável.</td>
                 <td>Card finalizado (.PNG ou .JPG)</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#547658">4</span></td>
+                <td><span class="etapa" style="background:{VERDE}">4</span></td>
                 <td><strong>Comunicador responsável</strong></td>
                 <td>Redige a legenda do post: chamada de abertura + informação principal + hashtags obrigatórios (#UNIVAJA #ValeDoJavari #PovosIndígenas).</td>
                 <td>Legenda redigida</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#B6352E">5</span></td>
+                <td><span class="etapa" style="background:{VERMELHO_MED}">5</span></td>
                 <td><strong>Ponto focal</strong></td>
                 <td>Envia card + legenda no grupo ASCOM para aprovação. Material fica em espera — não publica antes do aval.</td>
                 <td>Material no grupo ASCOM</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#B6352E">6</span></td>
+                <td><span class="etapa" style="background:{VERMELHO_MED}">6</span></td>
                 <td><strong>Coordenação ASCOM</strong></td>
                 <td>
                     ✅ <strong>Aprovado</strong> → segue para etapa 7<br>
@@ -377,7 +145,7 @@ with aba1:
                 <td>Aprovação registrada no grupo</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#547658">7</span></td>
+                <td><span class="etapa" style="background:{PRIMARIA}">7</span></td>
                 <td><strong>TUMI ou DÉBORA</strong></td>
                 <td>Publicam o card nas redes: Instagram, LinkedIn e WhatsApp conforme a orientação da pauta. Únicas com acesso ao perfil do Instagram.</td>
                 <td>✅ Post publicado</td>
@@ -394,17 +162,13 @@ with aba1:
     """, unsafe_allow_html=True)
 
     # ── Fluxo 2B: Vídeo ─────────────────────────────────────────────────────
-    st.markdown("---")
-    st.markdown("""
-    <div style="background:#384E3A;color:white;padding:8px 16px;border-radius:8px;font-weight:600;font-size:14px;margin-bottom:12px">
-        ◆ Fluxo 2B — Publicação: Vídeo / Reels
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(divisor("zig"), unsafe_allow_html=True)
+    st.markdown(section_title("Fluxo 2B — Publicação: Vídeo / Reels", "verde"), unsafe_allow_html=True)
 
-    st.markdown("""
+    st.markdown(f"""
     <table class="tabela-fluxo">
         <thead>
-            <tr style="background:#384E3A">
+            <tr>
                 <th style="width:60px">Etapa</th>
                 <th style="width:230px">Responsável</th>
                 <th>Ação</th>
@@ -413,37 +177,37 @@ with aba1:
         </thead>
         <tbody>
             <tr>
-                <td><span class="etapa" style="background:#384E3A">1</span></td>
+                <td><span class="etapa" style="background:{VERDE_ESC}">1</span></td>
                 <td><strong>Comunicador designado</strong></td>
                 <td>Propõe o tema na reunião de segunda. Define o formato: depoimento de liderança, cobertura de evento ou boletim informativo.</td>
                 <td>Proposta no grupo ASCOM</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#384E3A">2</span></td>
+                <td><span class="etapa" style="background:{VERDE_ESC}">2</span></td>
                 <td><strong>Responsável pelo roteiro</strong></td>
                 <td>Escreve o roteiro completo com: contexto, falas ou narração, ordem das cenas, duração estimada. <strong>Máximo 90 segundos para Reels do Instagram.</strong> Roteiro deve ser aprovado antes de gravar.</td>
                 <td>Roteiro no grupo ASCOM</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#384E3A">3</span></td>
+                <td><span class="etapa" style="background:{VERDE_ESC}">3</span></td>
                 <td><strong>Responsável pela gravação/edição</strong></td>
                 <td>Grava conforme o roteiro aprovado. Edita o vídeo incluindo: cortes, legendas em português (acessibilidade), trilha sonora e logo da UNIVAJA.</td>
                 <td>Vídeo finalizado (.MP4)</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#384E3A">4</span></td>
+                <td><span class="etapa" style="background:{VERDE_ESC}">4</span></td>
                 <td><strong>Comunicador responsável</strong></td>
                 <td>Redige a legenda: chamada de abertura + resumo do conteúdo + hashtags (#UNIVAJA #ValeDoJavari #PovosIndígenas #ComunicaçãoIndígena).</td>
                 <td>Legenda redigida</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#B6352E">5</span></td>
+                <td><span class="etapa" style="background:{VERMELHO_MED}">5</span></td>
                 <td><strong>Ponto focal</strong></td>
                 <td>Envia vídeo + legenda no grupo ASCOM. Material aguarda aprovação. Não publica antes do aval.</td>
                 <td>Material no grupo ASCOM</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#B6352E">6</span></td>
+                <td><span class="etapa" style="background:{VERMELHO_MED}">6</span></td>
                 <td><strong>Coordenação ASCOM</strong></td>
                 <td>
                     ✅ <strong>Aprovado</strong> → segue para etapa 7<br>
@@ -452,7 +216,7 @@ with aba1:
                 <td>Aprovação registrada</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#547658">7</span></td>
+                <td><span class="etapa" style="background:{PRIMARIA}">7</span></td>
                 <td><strong>TUMI ou DÉBORA</strong></td>
                 <td>Publicam o vídeo nas redes: Instagram Reels, WhatsApp e LinkedIn. Adaptam a legenda para cada rede se necessário (LinkedIn mais formal, sem excesso de hashtags).</td>
                 <td>✅ Vídeo publicado</td>
@@ -462,22 +226,21 @@ with aba1:
     """, unsafe_allow_html=True)
 
     # ── Fluxo 3: Político ───────────────────────────────────────────────────
-    st.markdown("---")
+    st.markdown(divisor("marubo"), unsafe_allow_html=True)
+    st.markdown(section_title("Fluxo 3 — Aprovação política (temas sensíveis)", "vermelho"), unsafe_allow_html=True)
+
     st.markdown("""
-    <div style="background:#780B0B;color:white;padding:8px 16px;border-radius:8px;font-weight:600;font-size:14px;margin-bottom:8px">
-        ◆ Fluxo 3 — Aprovação política (temas sensíveis)
-    </div>
-    <div class="alerta alerta-vermelho" style="margin-bottom:12px">
+    <div class="alerta alerta-vermelho">
         🔴 <strong>Use este fluxo sempre que o material envolver:</strong> posicionamento político, denúncia,
         crise institucional, questão jurídica, imagem do Presidente ou qualquer assunto que possa
         afetar parceiros e patrocinadores.
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("""
+    st.markdown(f"""
     <table class="tabela-fluxo">
         <thead>
-            <tr style="background:#780B0B">
+            <tr>
                 <th style="width:60px">Etapa</th>
                 <th style="width:220px">Responsável</th>
                 <th>Ação</th>
@@ -486,37 +249,37 @@ with aba1:
         </thead>
         <tbody>
             <tr>
-                <td><span class="etapa" style="background:#780B0B">1</span></td>
+                <td><span class="etapa" style="background:{VERMELHO_ESC}">1</span></td>
                 <td><strong>Qualquer comunicador</strong></td>
                 <td>Identifica que o material envolve tema sensível (político, denúncia, jurídico ou crise). <strong>NÃO produz nada ainda.</strong> Aciona o grupo ASCOM imediatamente.</td>
                 <td>Alerta no grupo ASCOM</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#780B0B">2</span></td>
+                <td><span class="etapa" style="background:{VERMELHO_ESC}">2</span></td>
                 <td><strong>Comunicador → Ponto Focal Indígena</strong></td>
                 <td>Aciona diretamente o ponto focal indígena da ASCOM. Descreve o tema, o fato ocorrido e o que precisaria ser comunicado. Aguarda orientação antes de qualquer ação.</td>
                 <td>Consulta registrada</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#5F5E5A">3a</span></td>
+                <td><span class="etapa" style="background:{CINZA}">3a</span></td>
                 <td><strong>Procuradoria Jurídica</strong></td>
                 <td>Avalia as implicações legais do material. Orienta sobre o que pode ou não ser publicado. Verifica se há risco jurídico para a UNIVAJA ou para os comunicadores.</td>
                 <td>Parecer jurídico</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#5F5E5A">3b</span></td>
+                <td><span class="etapa" style="background:{CINZA}">3b</span></td>
                 <td><strong>Coordenação Geral UNIVAJA</strong></td>
                 <td>Valida o posicionamento político. Define qual é a mensagem institucional da organização. Decide se a UNIVAJA vai se pronunciar ou manter silêncio estratégico.</td>
                 <td>Orientação política</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#B6352E">4</span></td>
+                <td><span class="etapa" style="background:{VERMELHO_MED}">4</span></td>
                 <td><strong>Coordenação + Procuradoria (juntos)</strong></td>
                 <td>Decisão conjunta entre as três opções abaixo. A decisão é comunicada à equipe ASCOM com clareza.</td>
                 <td>Decisão registrada</td>
             </tr>
             <tr>
-                <td><span class="etapa" style="background:#547658">5</span></td>
+                <td><span class="etapa" style="background:{VERDE}">5</span></td>
                 <td><strong>Ponto focal + equipe ASCOM</strong></td>
                 <td>Executa a decisão: publica conforme fluxo normal (2A ou 2B), aguarda em silêncio, ou foca em conteúdo institucional positivo para proteger a imagem da UNIVAJA.</td>
                 <td>Ação comunicada à equipe</td>
@@ -557,17 +320,13 @@ with aba1:
     """, unsafe_allow_html=True)
 
     # ── Fluxo Quinzenal ─────────────────────────────────────────────────────
-    st.markdown("---")
-    st.markdown("""
-    <div style="background:#1F2A21;color:white;padding:8px 16px;border-radius:8px;font-weight:600;font-size:14px;margin-bottom:12px">
-        ◆ Fluxo 4 — Ciclo quinzenal com a coordenação
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(divisor("marubo"), unsafe_allow_html=True)
+    st.markdown(section_title("Fluxo 4 — Ciclo quinzenal com a coordenação", "padrao"), unsafe_allow_html=True)
 
     st.markdown("""
     <table class="tabela-fluxo">
         <thead>
-            <tr style="background:#1F2A21">
+            <tr>
                 <th>Reunião</th>
                 <th>Frequência</th>
                 <th>O que acontece</th>
@@ -607,37 +366,33 @@ with aba1:
     st.markdown("**Proposta de calendário editorial mínimo por semana:**")
     col_ca, col_cb, col_cc = st.columns(3)
     with col_ca:
-        st.markdown("""
+        st.markdown(f"""
         <div class="card card-teal">
-            <strong style="color:#547658">Terça-feira</strong><br>
+            <strong style="color:{VERDE}">Terça-feira</strong><br>
             <span style="font-size:13px">Série associações de base</span><br>
             <span style="font-size:12px;color:#6b7280">Instagram + WhatsApp</span>
         </div>
         """, unsafe_allow_html=True)
     with col_cb:
-        st.markdown("""
+        st.markdown(f"""
         <div class="card card-roxo">
-            <strong style="color:#1F2A21">Quinta-feira</strong><br>
+            <strong style="color:{VERDE_ESC}">Quinta-feira</strong><br>
             <span style="font-size:13px">Pauta institucional, agenda ou cobertura de evento</span><br>
             <span style="font-size:12px;color:#6b7280">Instagram + LinkedIn</span>
         </div>
         """, unsafe_allow_html=True)
     with col_cc:
-        st.markdown("""
+        st.markdown(f"""
         <div class="card card-verde">
-            <strong style="color:#547658">Sábado (quinzenal)</strong><br>
+            <strong style="color:{VERDE}">Sábado (quinzenal)</strong><br>
             <span style="font-size:13px">Cultura, data comemorativa ou pauta positiva</span><br>
             <span style="font-size:12px;color:#6b7280">Instagram + WhatsApp</span>
         </div>
         """, unsafe_allow_html=True)
 
     # ── Quem faz o quê ──────────────────────────────────────────────────────
-    st.markdown("---")
-    st.markdown("""
-    <div style="background:#222221;color:white;padding:8px 16px;border-radius:8px;font-weight:600;font-size:14px;margin-bottom:12px">
-        ◆ Quadro de referência — Quem faz o quê?
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(divisor("zig"), unsafe_allow_html=True)
+    st.markdown(section_title("Quem faz o quê — quadro de referência", "padrao"), unsafe_allow_html=True)
 
     pessoas = [
         ("Comunicador designado", "Propõe pauta, redige briefing e legenda, produz roteiro.", "Publicar nas redes sem aprovação."),
@@ -668,7 +423,7 @@ with aba1:
 # ══════════════════════════════════════════════════════════════════════════════
 with aba2:
 
-    st.markdown("### Glossário básico e pautas de referência")
+    st.markdown(section_title("Glossário básico e pautas de referência", "padrao"), unsafe_allow_html=True)
     st.caption("Respostas para as perguntas mais comuns da equipe sobre tipos de texto e temas prioritários.")
 
     col_g1, col_g2 = st.columns([1, 1])
@@ -698,9 +453,9 @@ with aba2:
     with col_g2:
         st.markdown("#### Pautas prioritárias da UNIVAJA")
 
-        st.markdown("""
+        st.markdown(f"""
         <div class="card card-azul" style="margin-bottom:8px">
-            <strong style="color:#1F2A21;font-size:13px">📰 Pautas informativas</strong>
+            <strong style="color:{VERDE_PRETO};font-size:13px">📰 PAUTAS INFORMATIVAS</strong>
             <ul style="font-size:13px;margin:8px 0 0;padding-left:18px;line-height:1.8">
                 <li>História de luta e conquistas dos Povos do Vale do Javari</li>
                 <li>Demarcação da Terra Indígena — União dos Povos</li>
@@ -715,7 +470,7 @@ with aba2:
             </ul>
         </div>
         <div class="card card-verde" style="margin-bottom:8px">
-            <strong style="color:#547658;font-size:13px">🌱 Pautas positivas</strong>
+            <strong style="color:{VERDE};font-size:13px">🌱 PAUTAS POSITIVAS</strong>
             <ul style="font-size:13px;margin:8px 0 0;padding-left:18px;line-height:1.8">
                 <li>Cultura dos Povos do Vale do Javari</li>
                 <li>Datas comemorativas e celebrativas</li>
@@ -725,7 +480,7 @@ with aba2:
             </ul>
         </div>
         <div class="card card-vermelho">
-            <strong style="color:#DC3637;font-size:13px">🚨 Pautas de denúncia</strong>
+            <strong style="color:{PRIMARIA};font-size:13px">🚨 PAUTAS DE DENÚNCIA</strong>
             <ul style="font-size:13px;margin:8px 0 0;padding-left:18px;line-height:1.8">
                 <li>Violência e violações de direitos</li>
                 <li>Invasões e exploração do território</li>
@@ -748,9 +503,11 @@ with aba2:
         ]
         for nome, desc in pilares:
             st.markdown(f"""
-            <div style="padding:10px 14px;border-left:4px solid #DC3637;background:#fce8e8;border-radius:0 6px 6px 0;margin-bottom:8px">
-                <strong style="font-size:13px;color:#DC3637">{nome}</strong>
-                <p style="font-size:12px;color:#374151;margin:4px 0 0;line-height:1.5">{desc}</p>
+            <div class="card-grafismo" style="margin-bottom:10px">
+                <div class="card-grafismo-conteudo">
+                    <strong style="font-size:13px;color:{PRIMARIA};text-transform:uppercase;letter-spacing:0.5px">{nome}</strong>
+                    <p style="font-size:12px;color:{CINZA};margin:6px 0 0;line-height:1.5">{desc}</p>
+                </div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -760,54 +517,42 @@ with aba2:
 # ══════════════════════════════════════════════════════════════════════════════
 with aba3:
 
-    st.markdown("### Agenda da semana 02–08/06/2026")
+    st.markdown(section_title("Agenda da semana 02–08/06/2026", "padrao"), unsafe_allow_html=True)
     st.caption("Pautas prioritárias e checklists para cada publicação urgente desta semana.")
 
     agenda = [
         {
-            "data": "02/06 · Segunda",
-            "tipo": "Reunião interna",
-            "cor": "#1F2A21",
+            "data": "02/06 · Segunda", "tipo": "Reunião interna", "cor": VERDE_PRETO,
             "pauta": "Reunião semanal ASCOM: briefar a equipe sobre as publicações de 04 e 05/06. Verificar status das associações de base pendentes. Definir responsáveis para cada entrega da semana.",
             "resp": "Ponto focal + todos os comunicadores",
             "check": ["Pauta da reunião preparada","Responsáveis para 04/06 definidos","Responsáveis para 05/06 definidos","Status da série associações atualizado"]
         },
         {
-            "data": "03/06 · Terça",
-            "tipo": "Produção",
-            "cor": "#547658",
+            "data": "03/06 · Terça", "tipo": "Produção", "cor": VERDE,
             "pauta": "Preparar card de divulgação do evento de Berlim (04/06). Checar contato com Pixi Matis ou organização do Amazon Week para receber registros fotográficos ao vivo.",
             "resp": "Designer + comunicador designado + FRAN",
             "check": ["Card de divulgação do evento criado","Legenda redigida com menção aos parceiros (RFN, BMZ)","Contato estabelecido com Pixi Matis ou org. do evento","Material aprovado no grupo ASCOM"]
         },
         {
-            "data": "04/06 · Quarta",
-            "tipo": "Cobertura — URGENTE",
-            "cor": "#DC3637",
+            "data": "04/06 · Quarta", "tipo": "Cobertura — URGENTE", "cor": PRIMARIA,
             "pauta": "Indigenous Leadership at the Frontline — Amazon Week 2026, Berlim. Acompanhar o evento remotamente (10h–12h30 horário de Berlim = 7h–9h30 horário de Brasília). Coletar registros. Publicar cobertura até o final do dia.",
             "resp": "FRAN (redes) + comunicador de registro",
             "check": ["Card de divulgação publicado (manhã)","Evento acompanhado remotamente","Registros fotográficos coletados","Card de cobertura criado e aprovado","Publicação no Instagram, LinkedIn e WhatsApp"]
         },
         {
-            "data": "05/06 · Quinta",
-            "tipo": "Data sensível — URGENTE",
-            "cor": "#DC3637",
+            "data": "05/06 · Quinta", "tipo": "Data sensível — URGENTE", "cor": VERMELHO_ESC,
             "pauta": "Aniversário do assassinato de Bruno Pereira e Dom Phillips (3 anos). Publicar nota/card em TODAS as redes no mesmo dia. Mesma publicação para Instagram, LinkedIn e WhatsApp. Validar com coordenação e procuradoria ANTES de publicar.",
             "resp": "Ponto focal + designer + coordenação + TUMI/DÉBORA",
             "check": ["Rascunho do card pronto até 04/06 à noite","Legenda redigida (tom: memória + resistência + denúncia)","Validação com coordenação geral","Validação com procuradoria jurídica","Aprovação no grupo ASCOM","Publicação simultânea nas 3 redes até as 9h do dia 05/06"]
         },
         {
-            "data": "06–07/06 · Fim de semana",
-            "tipo": "Série associações",
-            "cor": "#547658",
+            "data": "06–07/06 · Fim de semana", "tipo": "Série associações", "cor": VERDE,
             "pauta": "Manter a publicação das associações de base pendentes da semana. Das 8 associações previstas, verificar quantas já foram publicadas e quais faltam.",
             "resp": "Comunicador da série + designer",
             "check": ["Verificar quantas associações foram publicadas","Produzir as 2 associações da semana se pendentes","Aprovar no grupo ASCOM","Publicar no Instagram + WhatsApp"]
         },
         {
-            "data": "08/06 · Domingo",
-            "tipo": "Reunião com coordenação",
-            "cor": "#1F2A21",
+            "data": "08/06 · Domingo", "tipo": "Reunião com coordenação", "cor": VERDE_ESC,
             "pauta": "Reunião estratégica com a coordenação geral. Apresentar estrutura atual, fluxo de trabalho e proposta de agenda quinzenal. Definir acessos ao Instagram. Alinhar sobre a situação política.",
             "resp": "Todos + coordenação UNIVAJA",
             "check": ["Apresentação do fluxo operacional preparada","Proposta de calendário quinzenal elaborada","Lista de acessos ao Instagram para discutir","Pauta da reunião enviada com antecedência","Manual de marca compartilhado com a equipe","Organização da caixa de e-mail definida"]
@@ -817,9 +562,9 @@ with aba3:
     for item in agenda:
         with st.expander(f"**{item['data']}** — {item['pauta'][:60]}...", expanded=False):
             st.markdown(f"""
-            <div style="border-left:5px solid {item['cor']};padding:12px 16px;background:#fafafa;border-radius:0 8px 8px 0;margin-bottom:12px">
-                <span style="background:{item['cor']};color:white;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:600">{item['tipo']}</span>
-                <p style="margin:10px 0 6px;font-size:14px;line-height:1.6">{item['pauta']}</p>
+            <div style="border-left:5px solid {item['cor']};padding:14px 18px;background:#fafafa;border-radius:0 10px 10px 0;margin-bottom:14px">
+                <span style="background:{item['cor']};color:white;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">{item['tipo']}</span>
+                <p style="margin:12px 0 8px;font-size:14px;line-height:1.6;color:{CINZA}">{item['pauta']}</p>
                 <p style="font-size:12px;color:#6b7280;margin:0"><strong>Responsável:</strong> {item['resp']}</p>
             </div>
             """, unsafe_allow_html=True)
@@ -829,15 +574,15 @@ with aba3:
                 st.checkbox(check, key=f"{item['data']}_{check}")
 
     # Sugestão de conteúdo 05/06
-    st.markdown("---")
-    st.markdown("### Sugestão de conteúdo — 05/06 (Bruno e Dom)")
+    st.markdown(divisor("marubo"), unsafe_allow_html=True)
+    st.markdown(section_title("Sugestão de conteúdo — 05/06 (Bruno e Dom)", "vermelho"), unsafe_allow_html=True)
 
     col_s1, col_s2 = st.columns(2)
     with col_s1:
-        st.markdown("""
+        st.markdown(f"""
         <div class="card card-vermelho">
-            <strong style="color:#DC3637">Sugestão de texto para o card</strong>
-            <p style="font-size:14px;font-style:italic;margin:10px 0;line-height:1.7;color:#374151">
+            <strong style="color:{PRIMARIA};text-transform:uppercase;letter-spacing:0.5px">Sugestão de texto para o card</strong>
+            <p style="font-size:14px;font-style:italic;margin:12px 0;line-height:1.7;color:{CINZA}">
             "3 anos sem Bruno e Dom.<br>
             A UNIVAJA não esquece, não cala, não recua.<br>
             Sua luta é a nossa luta.<br>
@@ -846,10 +591,10 @@ with aba3:
         </div>
         """, unsafe_allow_html=True)
     with col_s2:
-        st.markdown("""
+        st.markdown(f"""
         <div class="card card-cinza">
-            <strong style="color:#222221">Sugestão de legenda</strong>
-            <p style="font-size:13px;margin:10px 0;line-height:1.7;color:#374151">
+            <strong style="color:{VERDE_PRETO};text-transform:uppercase;letter-spacing:0.5px">Sugestão de legenda</strong>
+            <p style="font-size:13px;margin:12px 0;line-height:1.7;color:{CINZA}">
             Em 5 de junho de 2022, Bruno Pereira e Dom Phillips foram assassinados no Vale do Javari.
             Três anos depois, a UNIVAJA reafirma: a proteção do território é uma questão de vida.
             Sua memória nos fortalece e nos guia.<br><br>
@@ -859,7 +604,7 @@ with aba3:
         """, unsafe_allow_html=True)
 
     st.markdown("""
-    <div class="alerta" style="margin-top:8px">
+    <div class="alerta" style="margin-top:10px">
         ⚠️ <strong>Orientações para o 05/06:</strong> Tom respeitoso, firme e de memória ativa — não de lamento passivo.
         Evitar qualquer associação a questões políticas internas da UNIVAJA nesta data.
         Validar obrigatoriamente com coordenação e procuradoria antes de publicar.
@@ -872,11 +617,18 @@ with aba3:
 # ══════════════════════════════════════════════════════════════════════════════
 with aba4:
 
-    st.markdown("### Monitor de pautas — notícias e tendências")
+    st.markdown(section_title("Monitor de pautas — notícias e tendências", "padrao"), unsafe_allow_html=True)
     st.caption("Use antes da reunião de segunda (para sugerir pautas) e durante a produção (para embasar conteúdos).")
 
-    col_mb, col_mp = st.columns([1, 1])
+    st.markdown("""
+    <div class="alerta alerta-azul">
+        💡 <strong>Versão completa:</strong> esta plataforma faz a busca via Google. Para um monitor robusto
+        com coleta automática de notícias por RSS (12+ fontes), use o app
+        <strong>Monitor UNIVAJA</strong> separado (<code>monitor_univaja.py</code>).
+    </div>
+    """, unsafe_allow_html=True)
 
+    col_mb, col_mp = st.columns([1, 1])
     with col_mb:
         st.markdown("**Quando usar:**")
         st.markdown("""
@@ -886,61 +638,35 @@ with aba4:
         </div>
         """, unsafe_allow_html=True)
 
-    # Temas
     st.markdown("#### 1 · Selecione os temas")
 
     TEMAS = {
-        "Povos isolados": {
-            "tag": "pauta permanente", "badge": "badge-perm",
-            "termos": ["povos isolados Vale do Javari", "isolados voluntários Amazônia", "FUNAI isolados"]
-        },
-        "Garimpo e invasão": {
-            "tag": "denúncia / vigilância", "badge": "badge-den",
-            "termos": ["garimpo ilegal Vale do Javari", "invasão terra indígena Javari", "mineração ilegal Amazônia"]
-        },
-        "Direitos indígenas": {
-            "tag": "pauta política", "badge": "badge-perm",
-            "termos": ["direitos indígenas Brasil 2025", "demarcação terra indígena", "marco temporal indígena"]
-        },
-        "FUNAI e políticas": {
-            "tag": "institucional", "badge": "badge-seg",
-            "termos": ["FUNAI política indigenista", "ministério povos indígenas", "política indigenista Brasil"]
-        },
-        "Violência e assassinatos": {
-            "tag": "denúncia", "badge": "badge-den",
-            "termos": ["violência contra indígenas Amazônia", "assassinato liderança indígena", "conflito terra indígena"]
-        },
-        "Bruno e Dom": {
-            "tag": "memória", "badge": "badge-pos",
-            "termos": ["Bruno Pereira Dom Phillips", "aniversário Vale do Javari", "jornalista indigenista assassinado"]
-        },
-        "Meio ambiente": {
-            "tag": "ambiental", "badge": "badge-pos",
-            "termos": ["desmatamento Amazônia Vale do Javari", "proteção territorial indígena", "biodiversidade Javari"]
-        },
-        "Saúde indígena": {
-            "tag": "social", "badge": "badge-pos",
-            "termos": ["saúde indígena SESAI Javari", "doenças comunidades indígenas", "assistência médica aldeia"]
-        },
-        "Educação indígena": {
-            "tag": "social", "badge": "badge-pos",
-            "termos": ["educação escolar indígena Amazônia", "escola indígena Javari", "educação bilíngue indígena"]
-        },
-        "Amazon Week 2026": {
-            "tag": "evento atual", "badge": "badge-int",
-            "termos": ["Amazon Week 2026 Berlin", "liderança indígena fronteira", "UNIVAJA international event"]
-        },
-        "Clima e COP": {
-            "tag": "internacional", "badge": "badge-int",
-            "termos": ["mudança climática povos indígenas", "COP indigena Amazônia", "clima floresta tropical"]
-        },
-        "Atalaia do Norte": {
-            "tag": "local", "badge": "badge-local",
-            "termos": ["Atalaia do Norte notícias", "Amazonas terra indígena", "Vale do Javari município"]
-        },
+        "Povos isolados": {"tag": "pauta permanente", "badge": "badge-perm",
+            "termos": ["povos isolados Vale do Javari", "isolados voluntários Amazônia", "FUNAI isolados"]},
+        "Garimpo e invasão": {"tag": "denúncia / vigilância", "badge": "badge-den",
+            "termos": ["garimpo ilegal Vale do Javari", "invasão terra indígena Javari", "mineração ilegal Amazônia"]},
+        "Direitos indígenas": {"tag": "pauta política", "badge": "badge-perm",
+            "termos": ["direitos indígenas Brasil 2025", "demarcação terra indígena", "marco temporal indígena"]},
+        "FUNAI e políticas": {"tag": "institucional", "badge": "badge-seg",
+            "termos": ["FUNAI política indigenista", "ministério povos indígenas", "política indigenista Brasil"]},
+        "Violência e assassinatos": {"tag": "denúncia", "badge": "badge-den",
+            "termos": ["violência contra indígenas Amazônia", "assassinato liderança indígena", "conflito terra indígena"]},
+        "Bruno e Dom": {"tag": "memória", "badge": "badge-pos",
+            "termos": ["Bruno Pereira Dom Phillips", "aniversário Vale do Javari", "jornalista indigenista assassinado"]},
+        "Meio ambiente": {"tag": "ambiental", "badge": "badge-pos",
+            "termos": ["desmatamento Amazônia Vale do Javari", "proteção territorial indígena", "biodiversidade Javari"]},
+        "Saúde indígena": {"tag": "social", "badge": "badge-pos",
+            "termos": ["saúde indígena SESAI Javari", "doenças comunidades indígenas", "assistência médica aldeia"]},
+        "Educação indígena": {"tag": "social", "badge": "badge-pos",
+            "termos": ["educação escolar indígena Amazônia", "escola indígena Javari", "educação bilíngue indígena"]},
+        "Amazon Week 2026": {"tag": "evento atual", "badge": "badge-int",
+            "termos": ["Amazon Week 2026 Berlin", "liderança indígena fronteira", "UNIVAJA international event"]},
+        "Clima e COP": {"tag": "internacional", "badge": "badge-int",
+            "termos": ["mudança climática povos indígenas", "COP indigena Amazônia", "clima floresta tropical"]},
+        "Atalaia do Norte": {"tag": "local", "badge": "badge-local",
+            "termos": ["Atalaia do Norte notícias", "Amazonas terra indígena", "Vale do Javari município"]},
     }
 
-    # Grade de seleção de temas
     cols_temas = st.columns(4)
     selecionados_temas = []
     for i, (tema, info) in enumerate(TEMAS.items()):
@@ -950,9 +676,8 @@ with aba4:
                 selecionados_temas.append(tema)
             st.markdown(f'<span class="badge {info["badge"]}" style="font-size:10px">{info["tag"]}</span>', unsafe_allow_html=True)
 
-    st.markdown("---")
+    st.markdown(divisor("pontos"), unsafe_allow_html=True)
 
-    # Termo personalizado
     st.markdown("#### 2 · Ou adicione um termo específico")
     col_ti, col_tb = st.columns([4, 1])
     with col_ti:
@@ -974,57 +699,49 @@ with aba4:
                     st.session_state.termos_extras.remove(t)
                     st.rerun()
 
-    # Período
     st.markdown("#### 3 · Período")
-    periodo = st.radio(
-        "",
-        ["Última semana", "Último mês", "Último ano"],
-        horizontal=True,
-        label_visibility="collapsed",
-    )
+    periodo = st.radio("", ["Última semana", "Último mês", "Último ano"],
+                       horizontal=True, label_visibility="collapsed")
     periodo_gn = {"Última semana": "w", "Último mês": "m", "Último ano": "y"}[periodo]
     periodo_gt = {"Última semana": "past_7_days", "Último mês": "past_month", "Último ano": "past_12_months"}[periodo]
 
-    # Montar lista de termos
     todos_termos = []
     for tema in selecionados_temas:
         todos_termos.extend(TEMAS[tema]["termos"])
     todos_termos.extend(st.session_state.termos_extras)
-    todos_termos = list(dict.fromkeys(todos_termos))  # deduplicar
+    todos_termos = list(dict.fromkeys(todos_termos))
 
     if not todos_termos:
         todos_termos = ["UNIVAJA", "povos indígenas Vale do Javari", "Vale do Javari"]
 
-    # Montar URLs
     q_encoded = "+OR+".join([t.replace(" ", "+") for t in todos_termos[:4]])
-    q_trends   = ",".join(todos_termos[:5])
+    q_trends  = ",".join(todos_termos[:5])
 
     url_gnoticias = f"https://news.google.com/search?q={q_encoded}&hl=pt-BR&gl=BR&ceid=BR:pt-BR&as_qdr={periodo_gn}"
     url_gsearch   = f"https://www.google.com/search?q={q_encoded}&tbm=nws&hl=pt-BR&tbs=qdr:{periodo_gn}"
     url_trends    = f"https://trends.google.com/trends/explore?q={q_trends}&geo=BR&date={periodo_gt}&hl=pt-BR"
     url_trends_ex = f"https://trends.google.com/trends/explore?q={todos_termos[0].replace(' ','+')}&geo=BR&hl=pt-BR"
 
-    st.markdown("---")
+    st.markdown(divisor("zig"), unsafe_allow_html=True)
     st.markdown("#### 4 · Abra as buscas")
 
     if selecionados_temas or st.session_state.termos_extras:
         st.markdown(f"""
-        <div class="alerta alerta-verde" style="margin-bottom:12px">
+        <div class="alerta alerta-verde">
             ✅ <strong>{len(todos_termos)} termos selecionados.</strong>
             Clique nos links abaixo para abrir as buscas já com esses termos.
         </div>
         """, unsafe_allow_html=True)
     else:
         st.markdown("""
-        <div class="alerta" style="margin-bottom:12px">
+        <div class="alerta">
             💡 Selecione ao menos um tema acima para personalizar os links de busca.
         </div>
         """, unsafe_allow_html=True)
 
-    # Termos ativos
     if todos_termos:
         pills = " ".join([f'<span class="termo-pill">{t}</span>' for t in todos_termos])
-        st.markdown(f"<div style='margin-bottom:12px'>{pills}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='margin-bottom:14px'>{pills}</div>", unsafe_allow_html=True)
 
     col_l1, col_l2 = st.columns(2)
     with col_l1:
@@ -1042,7 +759,7 @@ with aba4:
         st.markdown(f"""
         <a href="{url_trends}" target="_blank" class="link-busca">
             <div class="link-busca-titulo">📈 Google Trends — comparativo →</div>
-            <div class="link-busca-desc">Veja qual dos termos está mais em alta no Brasil no período escolhido. Ajuda a priorizar pautas.</div>
+            <div class="link-busca-desc">Veja qual dos termos está mais em alta no Brasil no período escolhido.</div>
         </a>
         <a href="{url_trends_ex}" target="_blank" class="link-busca">
             <div class="link-busca-titulo">🔬 Google Trends — explorar →</div>
@@ -1050,15 +767,15 @@ with aba4:
         </a>
         """, unsafe_allow_html=True)
 
-    st.markdown("---")
+    st.markdown(divisor("pontos"), unsafe_allow_html=True)
     st.markdown("#### 5 · O que fazer com o que encontrou")
 
     col_o1, col_o2 = st.columns(2)
     with col_o1:
-        st.markdown("""
+        st.markdown(f"""
         <div class="card card-azul">
-            <strong style="color:#1F2A21">📅 Antes da reunião de segunda</strong>
-            <p style="font-size:13px;margin-top:8px;line-height:1.6">
+            <strong style="color:{VERDE_PRETO};text-transform:uppercase;letter-spacing:0.5px">📅 Antes da reunião de segunda</strong>
+            <p style="font-size:13px;margin-top:10px;line-height:1.6;color:{CINZA}">
             Selecione 3–5 notícias relevantes e leve como sugestão de pauta.
             Anote qual temática está em alta para justificar a escolha.
             Indique o formato sugerido (card, vídeo ou boletim).
@@ -1066,10 +783,10 @@ with aba4:
         </div>
         """, unsafe_allow_html=True)
     with col_o2:
-        st.markdown("""
+        st.markdown(f"""
         <div class="card card-verde">
-            <strong style="color:#547658">✏️ Durante a produção (ter–qua)</strong>
-            <p style="font-size:13px;margin-top:8px;line-height:1.6">
+            <strong style="color:{VERDE};text-transform:uppercase;letter-spacing:0.5px">✏️ Durante a produção (ter–qua)</strong>
+            <p style="font-size:13px;margin-top:10px;line-height:1.6;color:{CINZA}">
             Use as notícias para embasar o card ou o roteiro do vídeo.
             Cite a fonte no briefing enviado ao designer.
             Verifique se o tema ainda é atual antes de publicar.
@@ -1083,7 +800,7 @@ with aba4:
 # ══════════════════════════════════════════════════════════════════════════════
 with aba5:
 
-    st.markdown("### Como usar esta plataforma")
+    st.markdown(section_title("Como usar esta plataforma", "padrao"), unsafe_allow_html=True)
 
     col_u1, col_u2 = st.columns([1.2, 1])
 
@@ -1098,6 +815,10 @@ with aba5:
         - A agenda semanal com checklists
         - O monitor de notícias e tendências com links diretos
 
+        **Identidade visual:** segue o **Manual de Marca UNIVAJA**, com cores e grafismos
+        dos povos do Vale do Javari (Marubo, Matis, Kanamari, Kulina, Mayuruna)
+        aplicados em bordas, divisores e elementos decorativos.
+
         Não precisa instalar nada. Funciona pelo navegador de qualquer
         celular ou computador com internet.
         """)
@@ -1105,17 +826,19 @@ with aba5:
         st.markdown("#### Quem usa e quando?")
 
         usos = [
-            ("📅 Domingo / Segunda cedo", "Comunicador responsável da semana abre a aba **Monitor de pautas**, seleciona os temas, escolhe 'última semana' e abre os 4 links. Em 15 minutos tem sugestões de pauta para a reunião."),
+            ("📅 Domingo / Segunda cedo", "Comunicador responsável da semana abre o app **Monitor UNIVAJA**, seleciona os temas, filtra pelo período e salva 5–10 matérias para levar à reunião."),
             ("🤝 Reunião de segunda", "Ponto focal abre a aba **Fluxos integrados** para guiar a divisão de tarefas. Cada pessoa sai sabendo exatamente o que faz."),
-            ("✏️ Terça e quarta", "Comunicadores abrem a aba **Monitor de pautas** durante a produção para buscar notícias que embasem o card ou roteiro."),
+            ("✏️ Terça e quarta", "Comunicadores abrem o **Monitor UNIVAJA** durante a produção para buscar notícias que embasem o card ou roteiro."),
             ("✅ Quinta e sexta", "Ponto focal usa a aba **Fluxos** para lembrar o processo de aprovação antes de enviar ao grupo ASCOM."),
             ("📋 Reunião quinzenal", "Ponto focal apresenta a aba **Fluxos integrados** para a coordenação como referência do processo."),
         ]
         for momento, desc in usos:
             st.markdown(f"""
-            <div class="card card-cinza" style="margin-bottom:8px">
-                <strong style="font-size:13px;color:#222221">{momento}</strong>
-                <p style="font-size:13px;margin-top:6px;line-height:1.6">{desc}</p>
+            <div class="card-grafismo" style="margin-bottom:10px">
+                <div class="card-grafismo-conteudo">
+                    <strong style="font-size:13px;color:{VERDE_PRETO};text-transform:uppercase;letter-spacing:0.5px">{momento}</strong>
+                    <p style="font-size:13px;margin-top:8px;line-height:1.6;color:{CINZA}">{desc}</p>
+                </div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -1126,25 +849,25 @@ with aba5:
             ("1", "Criar conta no GitHub", "Acesse github.com e crie uma conta gratuita. O GitHub é onde o código da ferramenta fica guardado.", "https://github.com"),
             ("2", "Criar conta no Streamlit", "Acesse share.streamlit.io e crie uma conta gratuita (pode usar a conta do Google).", "https://share.streamlit.io"),
             ("3", "Criar repositório no GitHub", "No GitHub, clique em 'New repository'. Dê o nome 'ascom-univaja'. Deixe como público e clique em 'Create'."),
-            ("4", "Subir o arquivo Python", "Dentro do repositório criado, clique em 'Add file' → 'Upload files'. Suba o arquivo ascom_univaja.py que está nos documentos desta conversa."),
+            ("4", "Subir os arquivos", "Dentro do repositório criado, clique em 'Add file' → 'Upload files'. Suba os arquivos: ascom_univaja.py, monitor_univaja.py, univaja_brand.py e requirements.txt."),
             ("5", "Publicar no Streamlit", "No Streamlit, clique em 'New app'. Conecte ao GitHub. Selecione o repositório 'ascom-univaja' e o arquivo 'ascom_univaja.py'. Clique em 'Deploy'."),
             ("6", "Pronto — copie o link", "Em 2–3 minutos a ferramenta estará no ar com um link fixo como streamlit.app/univaja. Cole esse link no grupo do WhatsApp da equipe."),
         ]
 
         for num, titulo_p, desc, *url in passos:
-            link_html = f'<a href="{url[0]}" target="_blank" style="font-size:11px;color:#1F2A21">↗ Abrir site</a>' if url else ""
+            link_html = f'<a href="{url[0]}" target="_blank" style="font-size:11px;color:{VERDE_PRETO}">↗ Abrir site</a>' if url else ""
             st.markdown(f"""
-            <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
-                <span style="background:#DC3637;color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px">{num}</span>
+            <div style="display:flex;gap:10px;margin-bottom:12px;align-items:flex-start">
+                <span style="background:{PRIMARIA};color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;margin-top:2px;border:2px solid white;box-shadow:0 2px 6px rgba(120,11,11,.2)">{num}</span>
                 <div>
-                    <strong style="font-size:13px">{titulo_p}</strong> {link_html}
-                    <p style="font-size:12px;color:#6b7280;margin:3px 0 0;line-height:1.5">{desc}</p>
+                    <strong style="font-size:13px;color:{VERDE_PRETO}">{titulo_p}</strong> {link_html}
+                    <p style="font-size:12px;color:#6b7280;margin:4px 0 0;line-height:1.5">{desc}</p>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
         st.markdown("""
-        <div class="alerta alerta-verde" style="margin-top:8px">
+        <div class="alerta alerta-verde">
             ✅ <strong>É gratuito.</strong> O Streamlit Community Cloud não tem custo.
             O GitHub também é gratuito para projetos públicos.
             Não precisa de servidor, hospedagem ou técnico avançado.
@@ -1156,8 +879,11 @@ with aba5:
         <div class="card card-cinza">
             <p style="font-size:13px;line-height:1.6">
             Quando quiser adicionar um tema novo, mudar uma data ou ajustar o texto,
-            basta editar o arquivo <strong>ascom_univaja.py</strong> no GitHub.
+            basta editar o arquivo correspondente no GitHub.
             O Streamlit atualiza automaticamente em poucos segundos.
             </p>
         </div>
         """, unsafe_allow_html=True)
+
+    st.markdown(divisor("marubo"), unsafe_allow_html=True)
+    st.caption("ASCOM UNIVAJA · 2026 — uso interno · Identidade visual baseada no Manual de Marca UNIVAJA")

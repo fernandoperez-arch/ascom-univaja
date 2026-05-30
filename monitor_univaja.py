@@ -1,7 +1,7 @@
 """
 MONITOR UNIVAJA — Plataforma de notícias e tendências
 Coleta automatizada de notícias (RSS) + monitor de trends para a ASCOM UNIVAJA.
-Publicação: Streamlit Community Cloud.
+Identidade visual: manual de marca UNIVAJA (cores + grafismos dos povos do Vale do Javari).
 """
 
 import streamlit as st
@@ -10,7 +10,11 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus
 import re
 import json
-import io
+
+from univaja_brand import (
+    css_global, header, divisor, section_title,
+    PRIMARIA, VERDE_PRETO, VERDE,
+)
 
 # ─── Configuração da página ────────────────────────────────────────────────────
 st.set_page_config(
@@ -20,116 +24,17 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ─── CSS ──────────────────────────────────────────────────────────────────────
-st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
-html, body, [class*="css"] { font-family: 'Archivo', 'Segoe UI', Arial, sans-serif; }
-#MainMenu, footer, header { visibility: hidden; }
-
-.header-univaja {
-    background: linear-gradient(135deg, #DC3637 0%, #780B0B 100%);
-    color: white;
-    padding: 20px 26px;
-    border-radius: 12px;
-    margin-bottom: 18px;
-    display: flex; justify-content: space-between; align-items: center;
-}
-
-.stTabs [data-baseweb="tab-list"] {
-    gap: 4px; border-bottom: 2px solid #DC3637; padding-bottom: 0;
-}
-.stTabs [data-baseweb="tab"] {
-    background: #f5f5f5; border-radius: 8px 8px 0 0;
-    padding: 8px 18px; font-weight: 500; font-size: 14px; color: #494949;
-    border: 1px solid #ddd; border-bottom: none;
-}
-.stTabs [aria-selected="true"] {
-    background: #DC3637 !important; color: white !important; border-color: #DC3637 !important;
-}
-
-/* Card de notícia */
-.news-card {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-left: 5px solid #DC3637;
-    border-radius: 10px;
-    padding: 14px 18px;
-    margin-bottom: 12px;
-    transition: box-shadow .15s, transform .1s;
-}
-.news-card:hover { box-shadow: 0 4px 14px rgba(220,54,55,.12); }
-.news-titulo {
-    font-size: 15px; font-weight: 700; color: #222221; line-height: 1.4;
-    text-decoration: none; display: block; margin-bottom: 6px;
-}
-.news-titulo:hover { color: #DC3637; }
-.news-resumo { font-size: 13px; color: #494949; line-height: 1.55; margin-bottom: 8px; }
-.news-meta {
-    display: flex; gap: 12px; flex-wrap: wrap;
-    font-size: 11px; color: #6b7280; align-items: center;
-}
-.news-fonte {
-    background: #DC3637; color: white; padding: 2px 9px; border-radius: 10px;
-    font-weight: 600; font-size: 11px;
-}
-.news-tag {
-    background: #f0f5f1; color: #384E3A; padding: 2px 8px; border-radius: 10px;
-    font-size: 11px; font-weight: 500; border: 1px solid #99E19E;
-}
-.news-tag-prio {
-    background: #fce8e8; color: #780B0B; border-color: #E58D8D;
-}
-
-/* Stats */
-.stat-card {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 14px 18px;
-    text-align: center;
-}
-.stat-num { font-size: 28px; font-weight: 700; color: #DC3637; line-height: 1; }
-.stat-label { font-size: 12px; color: #6b7280; margin-top: 6px; text-transform: uppercase; letter-spacing: .5px; }
-
-/* Alerts */
-.alerta {
-    background: #fdf6e3; border: 1px solid #B6352E; border-left: 5px solid #B6352E;
-    border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #780B0B; margin: 12px 0;
-}
-.alerta-verde { background: #f0f5f1; border-color: #547658; border-left-color: #547658; color: #1F2A21; }
-.alerta-azul  { background: #f0f5f1; border-color: #384E3A; border-left-color: #384E3A; color: #1F2A21; }
-
-/* Link buscas */
-.link-busca {
-    display: block; background: white; border: 1px solid #e0e0e0; border-radius: 8px;
-    padding: 12px 16px; text-decoration: none; color: #222221; margin-bottom: 8px;
-    transition: border-color .15s;
-}
-.link-busca:hover { border-color: #DC3637; }
-.link-busca-titulo { font-weight: 600; font-size: 14px; color: #DC3637; }
-.link-busca-desc { font-size: 12px; color: #6b7280; margin-top: 3px; }
-
-/* Salvas */
-.salva-card {
-    background: #fdf2f2; border: 1px solid #E58D8D; border-left: 5px solid #B6352E;
-    border-radius: 10px; padding: 12px 16px; margin-bottom: 10px;
-}
-</style>
-""", unsafe_allow_html=True)
+st.markdown(css_global(), unsafe_allow_html=True)
 
 # ─── Header ───────────────────────────────────────────────────────────────────
-st.markdown("""
-<div class="header-univaja">
-    <div>
-        <div style="font-size:22px;font-weight:700;letter-spacing:1px">🌿 MONITOR UNIVAJA</div>
-        <div style="font-size:13px;opacity:.9;margin-top:2px">Notícias & tendências para a ASCOM</div>
-    </div>
-    <div style="font-size:12px;opacity:.85;text-align:right">
-        Atualizado em tempo real<br>Uso interno · 2026
-    </div>
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    header(
+        "MONITOR UNIVAJA",
+        "Notícias & tendências · ASCOM",
+        "Atualizado em tempo real · 2026",
+    ),
+    unsafe_allow_html=True,
+)
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  FONTES DE NOTÍCIAS (RSS)
@@ -150,7 +55,6 @@ FONTES = {
     "Google Notícias — Povos isolados": "https://news.google.com/rss/search?q=%22povos+isolados%22+Amaz%C3%B4nia&hl=pt-BR&gl=BR&ceid=BR:pt-BR",
 }
 
-# ─── Palavras-chave por tema (filtros) ───────────────────────────────────────
 TEMAS_PALAVRAS = {
     "🎯 Vale do Javari (prioritário)": [
         "vale do javari", "javari", "atalaia do norte", "univaja", "vale javari"
@@ -190,7 +94,6 @@ TEMAS_PALAVRAS = {
 # ─── Funções ─────────────────────────────────────────────────────────────────
 @st.cache_data(ttl=900)  # 15 minutos
 def carregar_feed(nome_fonte, url):
-    """Baixa um RSS e devolve entradas normalizadas."""
     try:
         feed = feedparser.parse(url)
         entradas = []
@@ -221,8 +124,7 @@ def carregar_feed(nome_fonte, url):
         return [{"_erro": str(ex), "fonte": nome_fonte}]
 
 def carregar_todas(fontes_selecionadas):
-    todas = []
-    erros = []
+    todas, erros = [], []
     for nome in fontes_selecionadas:
         url = FONTES[nome]
         itens = carregar_feed(nome, url)
@@ -231,12 +133,10 @@ def carregar_todas(fontes_selecionadas):
                 erros.append((it["fonte"], it["_erro"]))
             else:
                 todas.append(it)
-    # ordena por data (mais recentes primeiro); itens sem data vão pro fim
     todas.sort(key=lambda x: x["data"] or datetime(1970,1,1, tzinfo=timezone.utc), reverse=True)
     return todas, erros
 
 def filtrar_por_palavras(itens, palavras):
-    """Retorna itens que contêm pelo menos uma das palavras (no título ou resumo)."""
     if not palavras:
         return itens
     palavras_lower = [p.lower() for p in palavras]
@@ -267,7 +167,6 @@ def fmt_data(d):
     return f"há {m} min"
 
 def identificar_tags(item):
-    """Identifica quais temas o item toca."""
     tags = []
     texto = (item["titulo"] + " " + item["resumo"]).lower()
     for tema, palavras in TEMAS_PALAVRAS.items():
@@ -277,7 +176,7 @@ def identificar_tags(item):
 
 # ─── Estado de sessão ────────────────────────────────────────────────────────
 if "salvas" not in st.session_state:
-    st.session_state.salvas = {}  # link → item
+    st.session_state.salvas = {}
 if "fontes_ativas" not in st.session_state:
     st.session_state.fontes_ativas = list(FONTES.keys())
 
@@ -320,9 +219,9 @@ with st.sidebar:
     if st.button("🔄 Atualizar agora", use_container_width=True):
         st.cache_data.clear()
         st.rerun()
-    st.caption("Cache de 15 min. Use o botão para forçar atualização.")
+    st.caption("Cache de 15 min.")
 
-# ─── Reúne palavras-chave selecionadas ───────────────────────────────────────
+# ─── Palavras-chave combinadas ───────────────────────────────────────────────
 palavras_filtro = []
 for tema in temas_sel:
     palavras_filtro.extend(TEMAS_PALAVRAS[tema])
@@ -339,17 +238,22 @@ aba_n, aba_t, aba_s, aba_e, aba_a = st.tabs([
     "ℹ️ Sobre",
 ])
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 #  ABA — NOTÍCIAS
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 with aba_n:
+    st.markdown(section_title("Últimas notícias coletadas", "padrao"), unsafe_allow_html=True)
+
     if not fontes_ativas:
-        st.warning("Nenhuma fonte selecionada. Marque ao menos uma na barra lateral.")
+        st.markdown("""
+        <div class="alerta alerta-vermelho">
+            ⚠️ Nenhuma fonte selecionada. Marque ao menos uma na barra lateral.
+        </div>
+        """, unsafe_allow_html=True)
     else:
         with st.spinner(f"Coletando notícias de {len(fontes_ativas)} fontes…"):
             itens, erros = carregar_todas(fontes_ativas)
 
-        # filtros
         itens_periodo = filtrar_por_data(itens, dias)
         itens_filtrados = filtrar_por_palavras(itens_periodo, palavras_filtro)
 
@@ -368,6 +272,8 @@ with aba_n:
             st.markdown(f"""<div class="stat-card"><div class="stat-num">{len(st.session_state.salvas)}</div>
                 <div class="stat-label">Salvas</div></div>""", unsafe_allow_html=True)
 
+        st.markdown(divisor("marubo"), unsafe_allow_html=True)
+
         if erros:
             with st.expander(f"⚠️ {len(erros)} fonte(s) com erro"):
                 for fonte, msg in erros:
@@ -384,7 +290,6 @@ with aba_n:
             st.markdown(f"### 📰 {len(itens_filtrados)} notícias encontradas")
             st.caption(f"Ordenadas por data · período: {periodo_label.lower()}")
 
-            # Paginação simples
             por_pagina = 20
             total_paginas = max(1, (len(itens_filtrados) + por_pagina - 1) // por_pagina)
             if total_paginas > 1:
@@ -426,16 +331,15 @@ with aba_n:
                             st.session_state.salvas[card_id] = it
                         st.rerun()
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 #  ABA — TRENDS
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 with aba_t:
-    st.markdown("### 📈 O que está em alta no Brasil")
+    st.markdown(section_title("O que está em alta no Brasil", "verde"), unsafe_allow_html=True)
     st.caption("Use o Google Trends para entender qual tema tem mais buscas e priorizar pautas em alta.")
 
     termos_trends = []
     for tema in temas_sel:
-        # pega só o primeiro termo de cada tema para Trends (limite de 5)
         termos_trends.append(TEMAS_PALAVRAS[tema][0])
     termos_trends.extend(palavras_extra)
     termos_trends = list(dict.fromkeys(termos_trends))[:5]
@@ -445,11 +349,11 @@ with aba_t:
         st.markdown("""
         <div class="alerta">
             💡 Nenhum tema selecionado. Usando padrão: <strong>Vale do Javari, povos indígenas, UNIVAJA</strong>.
-            Marque temas na barra lateral para personalizar.
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown(f"**Termos no comparativo:** {', '.join(termos_trends)}")
+    pills = " ".join([f'<span class="termo-pill">{t}</span>' for t in termos_trends])
+    st.markdown(f"<div style='margin:10px 0'><strong style='color:{VERDE_PRETO}'>Termos no comparativo:</strong><br>{pills}</div>", unsafe_allow_html=True)
 
     periodo_trends_map = {
         "Últimas 24h": "now 1-d",
@@ -463,8 +367,8 @@ with aba_t:
     q_trends = ",".join(termos_trends)
     url_compare = f"https://trends.google.com/trends/explore?q={quote_plus(q_trends)}&geo=BR&date={quote_plus(periodo_tr)}&hl=pt-BR"
     url_explore = f"https://trends.google.com/trends/explore?q={quote_plus(termos_trends[0])}&geo=BR&hl=pt-BR"
-    url_diaria  = f"https://trends.google.com/trends/trendingsearches/daily?geo=BR&hl=pt-BR"
-    url_realtime= f"https://trends.google.com/trends/trendingsearches/realtime?geo=BR&category=all&hl=pt-BR"
+    url_diaria  = "https://trends.google.com/trends/trendingsearches/daily?geo=BR&hl=pt-BR"
+    url_realtime= "https://trends.google.com/trends/trendingsearches/realtime?geo=BR&category=all&hl=pt-BR"
 
     col_a, col_b = st.columns(2)
     with col_a:
@@ -490,8 +394,9 @@ with aba_t:
         </a>
         """, unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.markdown("### 🔎 Buscas em portais de notícia")
+    st.markdown(divisor("zig"), unsafe_allow_html=True)
+    st.markdown(section_title("Buscas em portais de notícia", "vermelho"), unsafe_allow_html=True)
+
     q_news = " OR ".join([f'"{t}"' for t in termos_trends[:3]])
     qdr_map = {
         "Últimas 24h": "d", "Últimos 3 dias": "w", "Última semana": "w",
@@ -517,19 +422,19 @@ with aba_t:
         </a>
         """, unsafe_allow_html=True)
 
-    st.markdown("---")
+    st.markdown(divisor("pontos"), unsafe_allow_html=True)
     st.markdown("""
     <div class="alerta alerta-azul">
         💡 <strong>Como usar na reunião de segunda:</strong> abra os 4 links acima, anote 3–5 temas que aparecem
-        com força e leve como sugestão de pauta com justificativa (“tema X subiu Y% esta semana”).
+        com força e leve como sugestão de pauta com justificativa ("tema X subiu Y% esta semana").
     </div>
     """, unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 #  ABA — SALVAS
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 with aba_s:
-    st.markdown("### ⭐ Notícias salvas para a reunião")
+    st.markdown(section_title("Notícias salvas para a reunião", "vermelho"), unsafe_allow_html=True)
     st.caption("Itens marcados com ☆ na aba Notícias. Use para preparar a pauta da reunião de segunda.")
 
     if not st.session_state.salvas:
@@ -560,11 +465,11 @@ with aba_s:
                 st.session_state.salvas.pop(link, None)
                 st.rerun()
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 #  ABA — EXPORTAR
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 with aba_e:
-    st.markdown("### 📤 Exportar pauta para a reunião")
+    st.markdown(section_title("Exportar pauta para a reunião", "padrao"), unsafe_allow_html=True)
     st.caption("Gera um documento com as notícias salvas, pronto para colar no grupo ASCOM.")
 
     if not st.session_state.salvas:
@@ -574,10 +479,9 @@ with aba_e:
         </div>
         """, unsafe_allow_html=True)
     else:
-        # Texto simples
         hoje = datetime.now().strftime("%d/%m/%Y")
         linhas = [
-            f"📋 PAUTAS SUGERIDAS — UNIVAJA ASCOM",
+            "📋 PAUTAS SUGERIDAS — UNIVAJA ASCOM",
             f"Reunião de segunda · {hoje}",
             f"Total de matérias: {len(st.session_state.salvas)}",
             "",
@@ -591,9 +495,8 @@ with aba_e:
             linhas.append("")
         texto = "\n".join(linhas)
 
-        # Markdown
         md_linhas = [
-            f"# 📋 Pautas sugeridas — UNIVAJA ASCOM",
+            "# 📋 Pautas sugeridas — UNIVAJA ASCOM",
             f"**Reunião de segunda · {hoje}**  ",
             f"_{len(st.session_state.salvas)} matérias_",
             "",
@@ -607,7 +510,6 @@ with aba_e:
             md_linhas.append("")
         md = "\n".join(md_linhas)
 
-        # JSON
         export_json = json.dumps(
             [{"fonte": it["fonte"], "titulo": it["titulo"], "link": it["link"],
               "resumo": it["resumo"], "data": it["data"].isoformat() if it["data"] else None}
@@ -618,31 +520,31 @@ with aba_e:
         col_d1, col_d2, col_d3 = st.columns(3)
         with col_d1:
             st.download_button(
-                "📄 Baixar TXT",
-                texto, file_name=f"pautas_univaja_{hoje.replace('/','-')}.txt",
+                "📄 Baixar TXT", texto,
+                file_name=f"pautas_univaja_{hoje.replace('/','-')}.txt",
                 mime="text/plain", use_container_width=True,
             )
         with col_d2:
             st.download_button(
-                "📝 Baixar Markdown",
-                md, file_name=f"pautas_univaja_{hoje.replace('/','-')}.md",
+                "📝 Baixar Markdown", md,
+                file_name=f"pautas_univaja_{hoje.replace('/','-')}.md",
                 mime="text/markdown", use_container_width=True,
             )
         with col_d3:
             st.download_button(
-                "🗂️ Baixar JSON",
-                export_json, file_name=f"pautas_univaja_{hoje.replace('/','-')}.json",
+                "🗂️ Baixar JSON", export_json,
+                file_name=f"pautas_univaja_{hoje.replace('/','-')}.json",
                 mime="application/json", use_container_width=True,
             )
 
         st.markdown("#### 👁️ Pré-visualização")
         st.text_area("", texto, height=400, label_visibility="collapsed")
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 #  ABA — SOBRE
-# ══════════════════════════════════════════════════════════════════════════════
+# ──────────────────────────────────────────────────────────────────────────────
 with aba_a:
-    st.markdown("### ℹ️ Sobre esta plataforma")
+    st.markdown(section_title("Sobre esta plataforma", "verde"), unsafe_allow_html=True)
     col1, col2 = st.columns([1.3, 1])
     with col1:
         st.markdown("""
@@ -663,28 +565,33 @@ with aba_a:
         - **Quinzenal:** ponto focal apresenta o consolidado de pautas relevantes
           para a coordenação.
 
+        ### 🎨 Identidade visual
+        Esta plataforma segue o **Manual de Marca UNIVAJA**, incorporando os grafismos
+        dos povos do Vale do Javari — Marubo (meander), Kanamari (ziguezagues),
+        Matis (losangos), Kulina (chevrons) e Mayuruna — nas bordas, divisores
+        e elementos decorativos.
+
         ### 🔄 Atualização
         O cache é de 15 minutos. Para forçar atualização imediata, use o botão
         **🔄 Atualizar agora** na barra lateral.
         """)
     with col2:
+        st.markdown(section_title("Publicação no Streamlit", "padrao"), unsafe_allow_html=True)
         st.markdown("""
-        ### 🚀 Publicação no Streamlit
-        1. Suba `monitor_univaja.py` + `requirements.txt` em um repositório GitHub
+        1. Suba os arquivos em um repositório GitHub
         2. Em [share.streamlit.io](https://share.streamlit.io), conecte o repositório
         3. Selecione `monitor_univaja.py` como entry point
         4. Clique em Deploy — em 2 minutos está no ar
+
+        **Arquivos necessários:**
+        - `monitor_univaja.py`
+        - `univaja_brand.py`
+        - `requirements.txt`
 
         ### 📚 Fontes ativas
         """)
         for nome in FONTES.keys():
             st.markdown(f"- {nome}")
 
-        st.markdown("""
-        ### ➕ Adicionar fontes
-        Edite o dicionário `FONTES` no topo do arquivo `monitor_univaja.py`.
-        Use qualquer feed RSS — basta o link.
-        """)
-
-    st.markdown("---")
-    st.caption("Monitor UNIVAJA · ASCOM · 2026 — uso interno")
+    st.markdown(divisor("marubo"), unsafe_allow_html=True)
+    st.caption("Monitor UNIVAJA · ASCOM · 2026 — uso interno · Grafismos inspirados nos povos do Vale do Javari")
