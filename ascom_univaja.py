@@ -208,226 +208,171 @@ with aba_h:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  ABA — FLUXOS INTEGRADOS (com infográficos)
+#  ABA — FLUXOS INTEGRADOS (fluxo único visual horizontal)
 # ══════════════════════════════════════════════════════════════════════════════
-def render_fluxograma(titulo, etapas, cor_titulo=VERDE):
-    """Renderiza um fluxograma vertical visual com cards conectados por setas."""
-    blocos = []
-    for i, e in enumerate(etapas):
-        cor = e.get("cor", cor_titulo)
-        blocos.append(f"""
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px">
-            <div style="background:{cor};color:white;width:48px;height:48px;border-radius:50%;
-                        display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;
-                        flex-shrink:0;border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,.15);
-                        font-family:'Battambang','Archivo',serif">{e.get('num','')}</div>
-            <div style="flex:1;background:white;border-radius:10px;padding:12px 18px;border-left:5px solid {cor};
-                        box-shadow:0 2px 8px rgba(0,0,0,.04)">
-                <div style="font-weight:700;color:{VERDE_PRETO};font-size:14px;margin-bottom:4px">
-                    {e.get('icon','')} {e.get('titulo','')}
-                </div>
-                <div style="font-size:12px;color:{CINZA};line-height:1.5">{e.get('descricao','')}</div>
-                <div style="background:{CREME};margin-top:8px;padding:6px 10px;border-radius:6px;font-size:11px;color:{VERDE_PRETO};
-                            border-left:3px solid {cor}">
-                    <strong>👤 {e.get('responsavel','')}</strong> · 📦 {e.get('entrega','')}
-                </div>
-            </div>
-        </div>
-        """)
-        if i < len(etapas) - 1:
-            blocos.append(f"""
-            <div style="margin-left:22px;font-size:18px;color:{cor};line-height:1;padding:2px 0">▼</div>
-            """)
-    return "".join(blocos)
-
-
 with aba1:
-    st.markdown(section_title("Fluxos integrados de comunicação", "padrao"), unsafe_allow_html=True)
-    st.caption("Fluxogramas visuais de cada tipo de publicação. Use antes da reunião e durante a produção.")
+    st.markdown(section_title("Fluxo unificado de publicações", "padrao"), unsafe_allow_html=True)
+    st.caption("Um único fluxo cobre todos os tipos de postagem. Tudo nesta tela — sem precisar rolar.")
 
-    # ── Ciclo semanal — infográfico circular ─────────────────────────────
-    st.markdown(divisor("marubo"), unsafe_allow_html=True)
-    st.markdown(section_title("◆ Fluxo 1 — Ciclo semanal", "padrao"), unsafe_allow_html=True)
+    # Banner: tipos de postagem cobertos
+    st.markdown(f"""
+    <div style="background:white;border:1.5px solid {VERDE_CLARO};border-radius:12px;padding:12px 18px;margin-bottom:14px;
+                display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div style="font-size:12px;color:{CINZA};font-weight:600;text-transform:uppercase;letter-spacing:1px">
+            Este fluxo cobre:
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="badge badge-prod">📷 Card / Carrossel</span>
+            <span class="badge badge-prod">🎥 Vídeo / Reels</span>
+            <span class="badge badge-prod">📝 Release / Nota oficial</span>
+            <span class="badge badge-prod">📡 Boletim</span>
+            <span class="badge badge-prod">🎙️ Live / Áudio</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    col_c1, col_c2, col_c3, col_c4 = st.columns(4)
-    ciclo_etapas = [
-        ("SEGUNDA",  "🗣️", "Reunião de pauta",  "Seleção de temas e divisão de tarefas",  VERDE_PRETO),
-        ("TER-QUA",  "🎨", "Produção",          "Roteiros, cards, vídeos e textos",         VERDE_ESC),
-        ("QUI-SEX",  "✅", "Aprovação",         "Envio ao grupo e validação da coord.",    VERMELHO_MED),
-        ("SEXTA+",   "📤", "Publicação",        "TUMI/DÉBORA publicam nas redes",          PRIMARIA),
+    # ── FLUXO HORIZONTAL — 5 etapas em colunas ────────────────────────────
+    etapas_unificadas = [
+        {"num": "1", "icon": "💡", "titulo": "PROPOSTA",
+         "subtitulo": "Pauta na reunião",
+         "responsavel": "Comunicador designado",
+         "acao": "Define tema, objetivo, público e tipo (card/vídeo/release).",
+         "entrega": "Proposta no grupo ASCOM",
+         "cor": VERDE_PRETO},
+        {"num": "2", "icon": "🎨", "titulo": "PRODUÇÃO",
+         "subtitulo": "Material conforme tipo",
+         "responsavel": "Designer · Roteirista · Editor",
+         "acao": "🎨 Designer cria card · 🎥 Roteiro+gravação+edição · 📝 Release escrito",
+         "entrega": ".PNG / .MP4 / .DOCX",
+         "cor": VERDE},
+        {"num": "3", "icon": "✍️", "titulo": "TEXTO",
+         "subtitulo": "Legenda + hashtags",
+         "responsavel": "Comunicador responsável",
+         "acao": "Chamada + informação principal + #UNIVAJA #ValeDoJavari + público-alvo.",
+         "entrega": "Texto pronto",
+         "cor": VERDE_ESC},
+        {"num": "4", "icon": "✅", "titulo": "APROVAÇÃO",
+         "subtitulo": "Validação obrigatória",
+         "responsavel": "Coordenação ASCOM",
+         "acao": "Aprovado → segue. Ajuste → retorna. Sensível → Procuradoria + Coord. geral.",
+         "entrega": "Aprovação no grupo",
+         "cor": VERMELHO_MED},
+        {"num": "5", "icon": "📤", "titulo": "PUBLICAÇÃO",
+         "subtitulo": "Nas redes",
+         "responsavel": "TUMI · DÉBORA",
+         "acao": "Instagram, LinkedIn, WhatsApp — adaptam legenda por rede.",
+         "entrega": "✅ Publicado",
+         "cor": PRIMARIA},
     ]
-    for col, (dia, icon, titulo, desc, cor) in zip([col_c1, col_c2, col_c3, col_c4], ciclo_etapas):
+
+    cols = st.columns(len(etapas_unificadas))
+    for col, e in zip(cols, etapas_unificadas):
         with col:
             st.markdown(f"""
-            <div style="background:white;border-radius:12px;padding:18px 14px;text-align:center;border-top:5px solid {cor};
-                        box-shadow:0 4px 12px rgba(0,0,0,.06);height:200px;display:flex;flex-direction:column;justify-content:space-between">
-                <div>
-                    <div style="font-size:11px;color:{cor};font-weight:800;letter-spacing:1.5px">{dia}</div>
-                    <div style="font-size:36px;margin:8px 0">{icon}</div>
-                    <div style="font-family:'Battambang',serif;font-size:16px;font-weight:700;color:{VERDE_PRETO}">{titulo}</div>
+            <div style="background:white;border-radius:14px;padding:14px 12px;height:280px;
+                        border-top:6px solid {e['cor']};box-shadow:0 4px 14px rgba(0,0,0,.06);
+                        display:flex;flex-direction:column;position:relative">
+                <div style="position:absolute;top:-22px;right:14px;background:{e['cor']};color:white;
+                            width:44px;height:44px;border-radius:50%;display:flex;align-items:center;
+                            justify-content:center;font-family:'Battambang',serif;font-weight:800;font-size:20px;
+                            border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,.15)">
+                    {e['num']}
                 </div>
-                <div style="font-size:11px;color:{CINZA};line-height:1.4">{desc}</div>
+                <div style="font-size:32px;margin-bottom:6px;line-height:1">{e['icon']}</div>
+                <div style="font-family:'Battambang',serif;font-size:14px;font-weight:700;color:{VERDE_PRETO};
+                            letter-spacing:1px;line-height:1.1">{e['titulo']}</div>
+                <div style="font-size:11px;color:{e['cor']};font-weight:600;margin-bottom:8px">{e['subtitulo']}</div>
+                <div style="font-size:11px;color:{CINZA};line-height:1.45;flex:1">{e['acao']}</div>
+                <div style="background:{CREME};padding:5px 8px;border-radius:6px;font-size:10px;
+                            color:{VERDE_PRETO};margin-top:8px;border-left:3px solid {e['cor']}">
+                    <strong>👤 {e['responsavel']}</strong><br>
+                    📦 {e['entrega']}
+                </div>
             </div>
             """, unsafe_allow_html=True)
 
-    # ── Fluxo 2A — Card / Imagem (fluxograma visual) ─────────────────────
-    st.markdown(divisor("zig"), unsafe_allow_html=True)
-    st.markdown(section_title("◆ Fluxo 2A — Publicação de Card / Imagem", "verde"), unsafe_allow_html=True)
-
-    etapas_2a = [
-        {"num": "1", "icon": "💡", "titulo": "Proposta de pauta",
-         "descricao": "Comunicador propõe tema na reunião de segunda. Define objetivo e público.",
-         "responsavel": "Comunicador designado", "entrega": "Proposta no grupo ASCOM", "cor": VERDE},
-        {"num": "2", "icon": "📝", "titulo": "Briefing para o designer",
-         "descricao": "Comunicador escreve briefing claro: tema, texto principal, destaques e referências visuais.",
-         "responsavel": "Comunicador → Designer", "entrega": "Briefing por escrito", "cor": VERDE},
-        {"num": "3", "icon": "🎨", "titulo": "Criação do card",
-         "descricao": "Designer cria o card seguindo o manual de marca: cores, fontes, grafismos e proporções.",
-         "responsavel": "Designer", "entrega": "Card .PNG ou .JPG", "cor": VERDE},
-        {"num": "4", "icon": "✍️", "titulo": "Redação da legenda",
-         "descricao": "Comunicador redige: chamada + informação principal + hashtags (#UNIVAJA #ValeDoJavari).",
-         "responsavel": "Comunicador responsável", "entrega": "Texto + hashtags", "cor": VERDE},
-        {"num": "5", "icon": "📨", "titulo": "Envio para aprovação",
-         "descricao": "Ponto focal envia card + legenda no grupo ASCOM. Material aguarda aval.",
-         "responsavel": "Ponto focal", "entrega": "Material no grupo", "cor": VERMELHO_MED},
-        {"num": "6", "icon": "✅", "titulo": "Aprovação da coordenação",
-         "descricao": "Coordenação avalia. Aprovado → segue. Ajuste → retorna às etapas 3 ou 4.",
-         "responsavel": "Coordenação ASCOM", "entrega": "Aprovação registrada", "cor": VERMELHO_MED},
-        {"num": "7", "icon": "📤", "titulo": "Publicação nas redes",
-         "descricao": "TUMI ou DÉBORA publicam no Instagram, LinkedIn e WhatsApp conforme orientação.",
-         "responsavel": "TUMI / DÉBORA", "entrega": "✅ Post publicado", "cor": PRIMARIA},
-    ]
-    st.markdown(render_fluxograma("Card", etapas_2a, VERDE), unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="alerta">
-        ⚠️ <strong>Regra inegociável:</strong> nenhum material pode ser publicado sem aprovação registrada no grupo ASCOM.
-        Em caso de dúvida, aguardar. Melhor atrasar um dia do que publicar algo errado.
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ── Fluxo 2B — Vídeo / Reels ─────────────────────────────────────────
-    st.markdown(divisor("zig"), unsafe_allow_html=True)
-    st.markdown(section_title("◆ Fluxo 2B — Publicação de Vídeo / Reels", "verde"), unsafe_allow_html=True)
-
-    etapas_2b = [
-        {"num": "1", "icon": "💡", "titulo": "Proposta de tema",
-         "descricao": "Comunicador define formato: depoimento, cobertura ou boletim. Duração estimada.",
-         "responsavel": "Comunicador designado", "entrega": "Proposta no grupo", "cor": VERDE_ESC},
-        {"num": "2", "icon": "📜", "titulo": "Roteiro completo",
-         "descricao": "Roteiro com contexto, falas, ordem das cenas. Máximo 90 segundos para Reels.",
-         "responsavel": "Responsável pelo roteiro", "entrega": "Roteiro aprovado antes de gravar", "cor": VERDE_ESC},
-        {"num": "3", "icon": "🎥", "titulo": "Gravação e edição",
-         "descricao": "Gravar conforme roteiro. Edição com cortes, legendas em português, trilha e logo UNIVAJA.",
-         "responsavel": "Equipe de produção", "entrega": "Vídeo .MP4 finalizado", "cor": VERDE_ESC},
-        {"num": "4", "icon": "✍️", "titulo": "Legenda do post",
-         "descricao": "Chamada + resumo + hashtags. Acessibilidade: legendas no vídeo são obrigatórias.",
-         "responsavel": "Comunicador responsável", "entrega": "Texto + hashtags", "cor": VERDE_ESC},
-        {"num": "5", "icon": "📨", "titulo": "Envio para aprovação",
-         "descricao": "Ponto focal envia no grupo ASCOM. Material aguarda aval da coordenação.",
-         "responsavel": "Ponto focal", "entrega": "Material no grupo", "cor": VERMELHO_MED},
-        {"num": "6", "icon": "✅", "titulo": "Aprovação",
-         "descricao": "Aprovado → publica. Ajuste → retorna às etapas 3 ou 4 com orientação clara.",
-         "responsavel": "Coordenação ASCOM", "entrega": "Aprovação registrada", "cor": VERMELHO_MED},
-        {"num": "7", "icon": "📤", "titulo": "Publicação",
-         "descricao": "Instagram Reels, WhatsApp e LinkedIn. Adaptam legenda para cada rede.",
-         "responsavel": "TUMI / DÉBORA", "entrega": "✅ Reels publicado", "cor": PRIMARIA},
-    ]
-    st.markdown(render_fluxograma("Vídeo", etapas_2b, VERDE_ESC), unsafe_allow_html=True)
-
-    # ── Fluxo 3 — Político / Sensível ────────────────────────────────────
-    st.markdown(divisor("marubo"), unsafe_allow_html=True)
-    st.markdown(section_title("◆ Fluxo 3 — Aprovação política (temas sensíveis)", "vermelho"), unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="alerta alerta-vermelho">
-        🔴 <strong>Use este fluxo sempre que o material envolver:</strong> posicionamento político, denúncia,
-        crise institucional, questão jurídica, imagem do Presidente ou qualquer assunto que possa
-        afetar parceiros e patrocinadores.
-    </div>
-    """, unsafe_allow_html=True)
-
-    etapas_3 = [
-        {"num": "🚨", "icon": "🛑", "titulo": "Identificação do tema sensível",
-         "descricao": "Qualquer comunicador identifica que envolve tema sensível. NÃO PRODUZ NADA AINDA.",
-         "responsavel": "Qualquer comunicador", "entrega": "Alerta no grupo ASCOM", "cor": VERMELHO_ESC},
-        {"num": "2", "icon": "📞", "titulo": "Consulta ao ponto focal",
-         "descricao": "Aciona diretamente o ponto focal indígena. Descreve o fato e o que precisa ser comunicado.",
-         "responsavel": "Comunicador → Ponto focal", "entrega": "Consulta registrada", "cor": VERMELHO_ESC},
-        {"num": "3", "icon": "⚖️", "titulo": "Análise jurídica",
-         "descricao": "Procuradoria avalia implicações legais. Verifica risco para a UNIVAJA e comunicadores.",
-         "responsavel": "Procuradoria jurídica", "entrega": "Parecer jurídico", "cor": CINZA},
-        {"num": "4", "icon": "🏛️", "titulo": "Posicionamento político",
-         "descricao": "Coordenação geral valida a mensagem institucional ou define silêncio estratégico.",
-         "responsavel": "Coordenação geral UNIVAJA", "entrega": "Orientação política", "cor": CINZA},
-        {"num": "5", "icon": "🤝", "titulo": "Decisão conjunta",
-         "descricao": "Coordenação + Procuradoria decidem juntos entre publicar, aguardar ou silêncio.",
-         "responsavel": "Coordenação + Procuradoria", "entrega": "Decisão comunicada", "cor": VERMELHO_MED},
-        {"num": "6", "icon": "▶️", "titulo": "Execução",
-         "descricao": "Equipe executa conforme decisão: publica pelo fluxo 2A/2B, aguarda ou foca em pauta positiva.",
-         "responsavel": "Ponto focal + equipe ASCOM", "entrega": "Ação comunicada", "cor": PRIMARIA},
-    ]
-    st.markdown(render_fluxograma("Político", etapas_3, VERMELHO_ESC), unsafe_allow_html=True)
-
-    # Três caminhos pós-decisão
-    st.markdown("##### 🚦 Três caminhos possíveis após a decisão")
-    col_pub, col_wait, col_sil = st.columns(3)
-    with col_pub:
+    # ── ALERTA TEMAS SENSÍVEIS (acima da dobra) ──────────────────────────
+    st.markdown("")
+    col_alert1, col_alert2 = st.columns([2, 1])
+    with col_alert1:
         st.markdown(f"""
-        <div class="decisao-col decisao-pub" style="text-align:center">
-            <div style="font-size:36px">✅</div>
-            <strong style="font-size:14px">PUBLICAR</strong><br>
-            <span style="font-size:12px">Aprovado pela coordenação e procuradoria. Segue pelo fluxo 2A/2B.</span>
-        </div>
-        """, unsafe_allow_html=True)
-    with col_wait:
-        st.markdown(f"""
-        <div class="decisao-col decisao-wait" style="text-align:center">
-            <div style="font-size:36px">⏳</div>
-            <strong style="font-size:14px">AGUARDAR</strong><br>
-            <span style="font-size:12px">Em avaliação. Não publica até nova orientação. Outros conteúdos seguem.</span>
-        </div>
-        """, unsafe_allow_html=True)
-    with col_sil:
-        st.markdown(f"""
-        <div class="decisao-col decisao-silent" style="text-align:center">
-            <div style="font-size:36px">🔇</div>
-            <strong style="font-size:14px">SILÊNCIO ESTRATÉGICO</strong><br>
-            <span style="font-size:12px">Não publica. Foco em conteúdo institucional positivo.</span>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="alerta alerta-vermelho" style="margin-top:14px">
-        🔴 <strong>Regra de ouro:</strong> Em caso de dúvida, NÃO PUBLIQUE. Acione o ponto focal e aguarde orientação.
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ── Quem faz o quê ─────────────────────────────────────────────────────
-    st.markdown(divisor("marubo"), unsafe_allow_html=True)
-    st.markdown(section_title("◆ Quem faz o quê — quadro de referência", "padrao"), unsafe_allow_html=True)
-
-    pessoas = [
-        ("Comunicador designado", "💡", "Propõe pauta, redige briefing e legenda, produz roteiro.", "Publicar nas redes sem aprovação."),
-        ("Designer", "🎨", "Cria cards seguindo manual de marca. Entrega ao ponto focal.", "Alterar identidade visual sem aval. Publicar sozinho."),
-        ("Ponto focal indígena", "🤝", "Articula equipe, envia material ao grupo, aciona coord. em temas sensíveis.", "Publicar material não aprovado pela coord. geral."),
-        ("FRAN", "📱", "Gerencia estratégia e conteúdo das redes sociais (Instagram + LinkedIn).", "Publicar sem aprovação ASCOM."),
-        ("TUMI / DÉBORA", "📤", "Únicas com acesso ao perfil do Instagram. Publicam após aprovação.", "Publicar material não aprovado. Dar acesso ao Instagram sem aval."),
-        ("Coordenação ASCOM", "✅", "Aprova ou solicita ajuste de materiais no grupo ASCOM.", "Emitir posicionamentos políticos sem aval da coord. geral."),
-        ("Coordenação geral UNIVAJA", "🏛️", "Valida pautas políticas e institucionais. Define posicionamento.", "— (instância máxima de aprovação)"),
-        ("Procuradoria jurídica", "⚖️", "Orienta sobre implicações legais de denúncias e temas sensíveis.", "— (consultiva, não executa conteúdo)"),
-    ]
-    col_pq1, col_pq2 = st.columns(2)
-    for i, (nome, icon, faz, nao) in enumerate(pessoas):
-        col = col_pq1 if i % 2 == 0 else col_pq2
-        with col:
-            st.markdown(f"""
-            <div class="pessoa-card">
-                <div class="pessoa-nome" style="font-size:15px">{icon} {nome}</div>
-                <div class="pessoa-faz">✅ {faz}</div>
-                <div class="pessoa-nao">🚫 Não faz sem orientação: {nao}</div>
+        <div style="background:linear-gradient(90deg,{VERMELHO_FUNDO if False else '#FCE8E8'} 0%, white 100%);
+                    border:2px solid {PRIMARIA};border-left:6px solid {VERMELHO_ESC};
+                    border-radius:10px;padding:12px 16px;margin-top:14px">
+            <div style="display:flex;gap:10px;align-items:center">
+                <div style="font-size:28px">🚨</div>
+                <div>
+                    <strong style="color:{VERMELHO_ESC};font-size:13px;letter-spacing:0.5px">
+                        DESVIO OBRIGATÓRIO — temas sensíveis
+                    </strong>
+                    <div style="font-size:12px;color:{CINZA};margin-top:4px;line-height:1.5">
+                        Política · denúncia · jurídico · imagem do Presidente · crise institucional<br>
+                        <strong>Antes da etapa 2 →</strong> acione ponto focal → análise Procuradoria + Coord. geral
+                        → decisão (publicar / aguardar / silêncio estratégico).
+                    </div>
+                </div>
             </div>
-            """, unsafe_allow_html=True)
+        </div>
+        """, unsafe_allow_html=True)
+    with col_alert2:
+        st.markdown(f"""
+        <div style="background:white;border:1.5px solid {VERDE_CLARO};border-radius:10px;padding:12px 16px;margin-top:14px">
+            <strong style="font-size:12px;color:{VERDE_PRETO};text-transform:uppercase;letter-spacing:0.5px">
+                ⚙️ Ciclo semanal
+            </strong>
+            <div style="font-size:11px;color:{CINZA};margin-top:6px;line-height:1.55">
+                <strong>SEG</strong> reunião · <strong>TER-QUA</strong> produção<br>
+                <strong>QUI-SEX</strong> aprovação · publicação
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # ── 3 SAÍDAS POR TEMA SENSÍVEL (mini) ────────────────────────────────
+    st.markdown("##### 🚦 Após análise de tema sensível, 3 caminhos possíveis:")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown(f"""
+        <div class="decisao-col decisao-pub" style="padding:10px 14px">
+            <strong style="font-size:13px">✅ PUBLICAR</strong><br>
+            <span style="font-size:11px">Aprovado pela Coord. + Procuradoria. Segue pelo fluxo normal.</span>
+        </div>
+        """, unsafe_allow_html=True)
+    with c2:
+        st.markdown(f"""
+        <div class="decisao-col decisao-wait" style="padding:10px 14px">
+            <strong style="font-size:13px">⏳ AGUARDAR</strong><br>
+            <span style="font-size:11px">Em avaliação. Equipe foca em outros conteúdos enquanto aguarda.</span>
+        </div>
+        """, unsafe_allow_html=True)
+    with c3:
+        st.markdown(f"""
+        <div class="decisao-col decisao-silent" style="padding:10px 14px">
+            <strong style="font-size:13px">🔇 SILÊNCIO ESTRATÉGICO</strong><br>
+            <span style="font-size:11px">Não publica. Foco em conteúdo institucional positivo.</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # ── Quem faz o quê (linha compacta opcional) ──────────────────────────
+    with st.expander("👥 Quem faz o quê — quadro detalhado de responsabilidades"):
+        pessoas = [
+            ("Comunicador designado", "💡", "Propõe pauta, redige briefing e legenda, produz roteiro."),
+            ("Designer", "🎨", "Cria cards seguindo manual de marca."),
+            ("Ponto focal indígena", "🤝", "Articula equipe, aciona coord. em temas sensíveis."),
+            ("FRAN", "📱", "Gerencia estratégia de redes sociais (Instagram + LinkedIn)."),
+            ("TUMI / DÉBORA", "📤", "Únicas com acesso ao Instagram. Publicam após aprovação."),
+            ("Coordenação ASCOM", "✅", "Aprova ou solicita ajuste de materiais."),
+            ("Coordenação geral UNIVAJA", "🏛️", "Valida pautas políticas. Define posicionamento."),
+            ("Procuradoria jurídica", "⚖️", "Orienta sobre implicações legais."),
+        ]
+        cols_p = st.columns(4)
+        for i, (nome, icon, faz) in enumerate(pessoas):
+            with cols_p[i % 4]:
+                st.markdown(f"""
+                <div style="background:white;border-left:4px solid {VERDE};border-radius:8px;padding:10px 12px;margin-bottom:8px;height:90px">
+                    <div style="font-weight:700;font-size:12px;color:{VERDE_PRETO};margin-bottom:4px">{icon} {nome}</div>
+                    <div style="font-size:11px;color:{CINZA};line-height:1.4">{faz}</div>
+                </div>
+                """, unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -536,7 +481,18 @@ with aba_monitor:
 
     TEMAS = st.session_state.temas_monitor
 
-    st.markdown("#### 1 · Selecione os temas")
+    col_t1, col_t2 = st.columns([4, 1])
+    with col_t1:
+        st.markdown("#### 1 · Selecione os temas")
+    with col_t2:
+        if st.button("🧹 Limpar seleção", use_container_width=True, key="limpar_temas_monitor"):
+            # Zera todos os checkboxes de tema
+            for k in list(st.session_state.keys()):
+                if k.startswith("tema_monitor_"):
+                    st.session_state[k] = False
+            st.session_state.termos_extras_monitor = []
+            st.rerun()
+
     cols_temas = st.columns(4)
     selecionados_temas = []
     for i, (tema, info) in enumerate(TEMAS.items()):
@@ -739,103 +695,213 @@ with aba_agenda:
 
     # ── DATAS FIXAS ─────────────────────────────────────────────────────────
     with sub_cal:
-        st.markdown("##### 📆 Calendário de datas fixas — postagens obrigatórias")
-        st.caption("Datas representativas dos povos indígenas, UNIVAJA, Vale do Javari e meio ambiente. Use como base do cronograma anual.")
+        import calendar as _cal
+        from datetime import date as _date
 
-        # Datas próximas (até 60 dias)
-        hoje = date.today()
-        proximas = []
+        st.markdown("##### 📆 Calendário anual de datas fixas")
+        st.caption("Navegue pelos meses. Datas em vermelho têm postagem prevista. Tudo editável.")
+
+        hoje = _date.today()
+        if "cal_ano" not in st.session_state: st.session_state.cal_ano = hoje.year
+        if "cal_mes" not in st.session_state: st.session_state.cal_mes = hoje.month
+
+        meses_pt = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+                    "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
+
+        col_nav1, col_nav2, col_nav3, col_nav4, col_nav5 = st.columns([1,1,3,1,1])
+        with col_nav1:
+            if st.button("◀ Ano", use_container_width=True, key="cal_ano_prev"):
+                st.session_state.cal_ano -= 1; st.rerun()
+        with col_nav2:
+            if st.button("◀ Mês", use_container_width=True, key="cal_mes_prev"):
+                if st.session_state.cal_mes == 1:
+                    st.session_state.cal_mes = 12; st.session_state.cal_ano -= 1
+                else:
+                    st.session_state.cal_mes -= 1
+                st.rerun()
+        with col_nav3:
+            mes_label = meses_pt[st.session_state.cal_mes-1].upper()
+            ano_label = st.session_state.cal_ano
+            st.markdown(
+                "<div style=\"text-align:center;padding:8px 0\">"
+                f"<span style=\"font-family:'Battambang',serif;font-weight:700;font-size:22px;color:{VERDE_PRETO};letter-spacing:2px\">"
+                f"{mes_label} {ano_label}</span></div>",
+                unsafe_allow_html=True
+            )
+        with col_nav4:
+            if st.button("Mês ▶", use_container_width=True, key="cal_mes_next"):
+                if st.session_state.cal_mes == 12:
+                    st.session_state.cal_mes = 1; st.session_state.cal_ano += 1
+                else:
+                    st.session_state.cal_mes += 1
+                st.rerun()
+        with col_nav5:
+            if st.button("Ano ▶", use_container_width=True, key="cal_ano_next"):
+                st.session_state.cal_ano += 1; st.rerun()
+
+        # Indexar eventos por dia
+        eventos_do_mes = {}
         for d in st.session_state.datas_fixas:
             try:
                 mes_str, dia_str = d["data"].split("-")
-                dt_ano = date(hoje.year, int(mes_str), int(dia_str))
-                if dt_ano < hoje:
-                    dt_ano = date(hoje.year + 1, int(mes_str), int(dia_str))
-                dias = (dt_ano - hoje).days
-                if dias <= 90:
-                    proximas.append((dias, dt_ano, d))
+                if int(mes_str) == st.session_state.cal_mes:
+                    eventos_do_mes.setdefault(int(dia_str), []).append(d)
             except Exception:
                 pass
 
-        if proximas:
-            st.markdown(f"##### 🚨 Datas nos próximos 90 dias")
-            for dias, dt, d in sorted(proximas, key=lambda x: x[0]):
-                if dias == 0: selo, cor = "HOJE", PRIMARIA
-                elif dias <= 7: selo, cor = f"em {dias} dia(s)", VERMELHO_MED
-                elif dias <= 30: selo, cor = f"em {dias} dias", VERDE_ESC
-                else: selo, cor = f"em {dias} dias", VERDE
+        _cal.setfirstweekday(_cal.SUNDAY)
+        semanas = _cal.monthcalendar(st.session_state.cal_ano, st.session_state.cal_mes)
 
-                meses_pt = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"]
-                data_fmt = f"{dt.day:02d} {meses_pt[dt.month-1]} {dt.year}"
+        dias_semana_lbl = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"]
+        hdr_partes = []
+        for d_lbl in dias_semana_lbl:
+            hdr_partes.append(
+                f"<div style=\"background:{VERDE_PRETO};color:white;padding:8px 4px;text-align:center;font-weight:700;font-size:11px;letter-spacing:1px;border-radius:6px 6px 0 0\">{d_lbl}</div>"
+            )
+        hdr = "".join(hdr_partes)
 
-                with st.container():
-                    col_d, col_c = st.columns([5, 1])
-                    with col_d:
-                        st.markdown(f"""
-                        <div class="card" style="border-left:5px solid {cor};margin-bottom:6px">
-                            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
-                                <div style="flex:1;min-width:260px">
-                                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
-                                        <span style="background:{cor};color:white;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:0.5px">{selo}</span>
-                                        <span style="font-weight:700;font-size:14px;color:{VERDE_PRETO}">📅 {data_fmt}</span>
-                                    </div>
-                                    <div style="font-weight:700;font-size:15px;color:{VERDE_PRETO};margin-bottom:4px">{d['titulo']}</div>
-                                    <div style="font-size:11px;color:{CINZA};margin-bottom:6px">
-                                        🏷️ {d['categoria']} · 📝 {d['formato']}
-                                    </div>
-                                    <div style="font-size:12px;color:{CINZA};line-height:1.5;font-style:italic;background:{CREME};padding:8px 10px;border-radius:6px">
-                                        💡 <strong>Sugestão:</strong> {d['sugestao']}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                    with col_c:
-                        if st.button("➕ Adicionar à agenda", key=f"add_cal_{d['titulo']}_{dt.year}", use_container_width=True):
-                            nova = {
-                                "id": str(uuid.uuid4())[:8],
-                                "data": dt.isoformat(),
-                                "titulo": d["titulo"],
-                                "responsavel": "",
-                                "tipo": d["formato"].split("/")[0].strip() if "/" in d["formato"] else d["formato"],
-                                "redes": ["Instagram"],
-                                "etapa": ETAPAS_AGENDA[0],
-                                "briefing": d["sugestao"],
-                                "origem": "calendário fixo",
-                            }
-                            st.session_state.agenda_pautas.append(nova)
-                            st.success(f"✅ '{d['titulo']}' adicionado à agenda!")
-                            st.rerun()
+        celulas = []
+        for semana in semanas:
+            for dia in semana:
+                if dia == 0:
+                    celulas.append("<div style=\"background:transparent;min-height:84px\"></div>")
+                    continue
+                eventos = eventos_do_mes.get(dia, [])
+                eh_hoje = (dia == hoje.day and st.session_state.cal_mes == hoje.month and st.session_state.cal_ano == hoje.year)
+                tem_evento = len(eventos) > 0
 
-        # Editor das datas fixas (avançado)
+                bg = "#FCE8E8" if tem_evento else "white"
+                borda = PRIMARIA if tem_evento else "#e5e7eb"
+                cor_dia = PRIMARIA if tem_evento else (VERDE_PRETO if eh_hoje else CINZA)
+                ring = f"box-shadow:0 0 0 2px {PRIMARIA};" if eh_hoje else ""
+
+                ev_html = ""
+                for ev in eventos[:2]:
+                    titulo_curto = ev["titulo"][:24] + ("…" if len(ev["titulo"]) > 24 else "")
+                    ev_html += f"<div style=\"background:{PRIMARIA};color:white;font-size:9px;padding:2px 5px;border-radius:4px;margin-top:3px;line-height:1.2;font-weight:600\">{titulo_curto}</div>"
+                if len(eventos) > 2:
+                    ev_html += f"<div style=\"font-size:9px;color:{CINZA};margin-top:2px\">+{len(eventos)-2}</div>"
+
+                marker_hoje = " 🔴" if eh_hoje else ""
+                fonte_w = 800 if eh_hoje else 700
+                celulas.append(
+                    f"<div style=\"background:{bg};border:1.5px solid {borda};border-radius:6px;padding:6px 7px;min-height:84px;{ring}position:relative\">"
+                    f"<div style=\"font-weight:{fonte_w};font-size:14px;color:{cor_dia};font-family:'Battambang',serif\">{dia}{marker_hoje}</div>"
+                    f"{ev_html}"
+                    f"</div>"
+                )
+
+        grid_html = "<div style=\"display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:14px 0\">"
+        grid_html += hdr + "".join(celulas) + "</div>"
+        st.markdown(grid_html, unsafe_allow_html=True)
+
+        # Eventos do mês — lista detalhada
         st.markdown(divisor("zig"), unsafe_allow_html=True)
-        with st.expander("📋 Ver todas as datas do calendário anual"):
-            for d in sorted(st.session_state.datas_fixas, key=lambda x: x["data"]):
-                meses_pt = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"]
+        st.markdown(f"##### 📌 Eventos de {meses_pt[st.session_state.cal_mes-1]}")
+
+        eventos_lista = [d for d in st.session_state.datas_fixas
+                         if d["data"].startswith(f"{st.session_state.cal_mes:02d}-")]
+        eventos_lista.sort(key=lambda x: x["data"])
+
+        if not eventos_lista:
+            st.markdown(
+                "<div class=\"alerta\">📭 Nenhuma data fixa neste mês. Use o editor abaixo para adicionar.</div>",
+                unsafe_allow_html=True
+            )
+        else:
+            for d in eventos_lista:
                 try:
                     m, dd = d["data"].split("-")
-                    data_label = f"{dd}/{m} ({meses_pt[int(m)-1]})"
+                    data_label = f"{int(dd):02d}/{int(m):02d}"
                 except Exception:
                     data_label = d["data"]
-                st.markdown(f"""
-                <div style="background:white;border-left:4px solid {VERDE};padding:8px 12px;border-radius:6px;margin-bottom:6px;font-size:12px">
-                    <strong style="color:{VERDE_PRETO}">{data_label} — {d['titulo']}</strong><br>
-                    <span style="color:{CINZA}">{d['categoria']} · {d['formato']}</span><br>
-                    <span style="font-style:italic;color:{CINZA}">{d['sugestao']}</span>
-                </div>
-                """, unsafe_allow_html=True)
 
-        with st.expander("✏️ Editar / adicionar datas fixas"):
-            st.caption("Cada linha: `MM-DD | Título | Categoria | Formato | Sugestão de postagem`")
+                col_dl, col_dc = st.columns([5, 1])
+                with col_dl:
+                    card_html = (
+                        f"<div class=\"card\" style=\"border-left:5px solid {PRIMARIA};margin-bottom:6px;padding:12px 16px\">"
+                        f"<div style=\"display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap\">"
+                        f"<div style=\"background:{PRIMARIA};color:white;padding:6px 12px;border-radius:8px;font-family:'Battambang',serif;font-weight:700;font-size:13px;letter-spacing:1px\">📅 {data_label}</div>"
+                        f"<div style=\"flex:1;min-width:220px\">"
+                        f"<div style=\"font-weight:700;font-size:14px;color:{VERDE_PRETO}\">{d['titulo']}</div>"
+                        f"<div style=\"font-size:11px;color:{CINZA};margin-top:2px\">🏷️ {d['categoria']} · 📝 {d['formato']}</div>"
+                        f"<div style=\"font-size:12px;color:{CINZA};line-height:1.5;font-style:italic;background:{CREME};padding:6px 10px;border-radius:6px;margin-top:6px\">💡 {d['sugestao']}</div>"
+                        f"</div></div></div>"
+                    )
+                    st.markdown(card_html, unsafe_allow_html=True)
+                with col_dc:
+                    try:
+                        mes_int = int(d["data"].split("-")[0])
+                        dia_int = int(d["data"].split("-")[1])
+                        ano_uso = st.session_state.cal_ano
+                        dt_ev = _date(ano_uso, mes_int, dia_int)
+                    except Exception:
+                        dt_ev = hoje
+                    if st.button("➕ Agenda", key=f"add_cal_{d['titulo']}_{st.session_state.cal_ano}", use_container_width=True):
+                        nova = {
+                            "id": str(uuid.uuid4())[:8],
+                            "data": dt_ev.isoformat(),
+                            "titulo": d["titulo"],
+                            "responsavel": "",
+                            "tipo": d["formato"].split("/")[0].strip() if "/" in d["formato"] else d["formato"],
+                            "redes": ["Instagram"],
+                            "etapa": ETAPAS_AGENDA[0],
+                            "briefing": d["sugestao"],
+                            "origem": "calendário fixo",
+                        }
+                        st.session_state.agenda_pautas.append(nova)
+                        st.success("✅ Adicionado!")
+                        st.rerun()
+
+        # Adicionar nova data
+        st.markdown(divisor("pontos"), unsafe_allow_html=True)
+        with st.expander("➕ Adicionar nova data ao calendário"):
+            with st.form("form_nova_data_fixa", clear_on_submit=True):
+                col_dt1, col_dt2 = st.columns([1, 3])
+                with col_dt1:
+                    nova_data = st.date_input("Dia/mês",
+                        value=_date(st.session_state.cal_ano, st.session_state.cal_mes, 1),
+                        format="DD/MM/YYYY")
+                with col_dt2:
+                    novo_titulo = st.text_input("Título da data",
+                        placeholder="ex: Aniversário UNIVAJA / Dia da Mulher Indígena")
+
+                col_dt3, col_dt4 = st.columns(2)
+                with col_dt3:
+                    nova_categoria = st.text_input("Categoria",
+                        placeholder="ex: Indígena nacional, UNIVAJA, Memória")
+                with col_dt4:
+                    novo_formato = st.text_input("Formato sugerido",
+                        placeholder="ex: Card / Carrossel / Vídeo")
+
+                nova_sugestao = st.text_area("Sugestão de postagem",
+                    placeholder="Texto-base, abordagem, referências visuais...",
+                    height=80)
+
+                if st.form_submit_button("➕ Adicionar ao calendário", type="primary", use_container_width=True):
+                    if novo_titulo.strip():
+                        nova_entrada = {
+                            "data": f"{nova_data.month:02d}-{nova_data.day:02d}",
+                            "titulo": novo_titulo.strip(),
+                            "categoria": nova_categoria.strip() or "Personalizada",
+                            "formato": novo_formato.strip() or "Card",
+                            "sugestao": nova_sugestao.strip() or "—",
+                        }
+                        st.session_state.datas_fixas.append(nova_entrada)
+                        st.success(f"✅ '{novo_titulo}' adicionado ao calendário!")
+                        st.rerun()
+
+        with st.expander("✏️ Editar todas as datas (lote)"):
+            st.caption("Cada linha: `MM-DD | Título | Categoria | Formato | Sugestão`")
             datas_txt = "\n".join([
                 f"{d['data']} | {d['titulo']} | {d['categoria']} | {d['formato']} | {d['sugestao']}"
-                for d in st.session_state.datas_fixas
+                for d in sorted(st.session_state.datas_fixas, key=lambda x: x["data"])
             ])
-            editor_datas = st.text_area("Datas", value=datas_txt, height=300,
+            editor_datas = st.text_area("Datas", value=datas_txt, height=320,
                                        label_visibility="collapsed", key="editor_datas_fixas")
             col_sd, col_rd = st.columns([3, 1])
             with col_sd:
-                if st.button("💾 Salvar datas fixas", type="primary", use_container_width=True, key="salvar_datas"):
+                if st.button("💾 Salvar alterações", type="primary", use_container_width=True, key="salvar_datas"):
                     novas = []
                     for linha in editor_datas.split("\n"):
                         partes = [p.strip() for p in linha.split("|")]
@@ -851,7 +917,7 @@ with aba_agenda:
                     st.session_state.datas_fixas = [dict(d) for d in DATAS_FIXAS_DEFAULT]
                     st.rerun()
 
-    # ── NOVA PAUTA ────────────────────────────────────────────────────────
+        # ── NOVA PAUTA ────────────────────────────────────────────────────────
     with sub_nova:
         st.markdown("##### ➕ Adicionar pauta à agenda da semana")
         st.caption("Use na reunião para registrar cada pauta proposta. Os campos são abertos — adaptem ao contexto.")
