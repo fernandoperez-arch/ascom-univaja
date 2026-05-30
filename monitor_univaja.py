@@ -1,7 +1,8 @@
 """
 MONITOR UNIVAJA — Plataforma de notícias e tendências
 Coleta automatizada de notícias (RSS) + monitor de trends para a ASCOM UNIVAJA.
-Identidade visual: manual de marca UNIVAJA (cores + grafismos dos povos do Vale do Javari).
+Fontes RSS e temas/palavras-chave totalmente customizáveis.
+Identidade visual: Manual de Marca UNIVAJA (grafismos dos povos do Vale do Javari).
 """
 
 import streamlit as st
@@ -13,20 +14,16 @@ import json
 
 from univaja_brand import (
     css_global, header, divisor, section_title,
-    PRIMARIA, VERDE_PRETO, VERDE,
+    PRIMARIA, VERDE_PRETO, VERDE, CINZA,
 )
 
-# ─── Configuração da página ────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Monitor UNIVAJA — Notícias & Trends",
     page_icon="🌿",
     layout="wide",
     initial_sidebar_state="expanded",
 )
-
 st.markdown(css_global(), unsafe_allow_html=True)
-
-# ─── Header ───────────────────────────────────────────────────────────────────
 st.markdown(
     header(
         "MONITOR UNIVAJA",
@@ -37,9 +34,9 @@ st.markdown(
 )
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  FONTES DE NOTÍCIAS (RSS)
+#  DEFAULTS (customizáveis na aba ⚙️ Configurações)
 # ══════════════════════════════════════════════════════════════════════════════
-FONTES = {
+FONTES_DEFAULT = {
     "Amazônia Real": "https://amazoniareal.com.br/feed/",
     "ISA — Socioambiental": "https://www.socioambiental.org/noticias-socioambientais/feed",
     "CIMI": "https://cimi.org.br/feed/",
@@ -55,7 +52,7 @@ FONTES = {
     "Google Notícias — Povos isolados": "https://news.google.com/rss/search?q=%22povos+isolados%22+Amaz%C3%B4nia&hl=pt-BR&gl=BR&ceid=BR:pt-BR",
 }
 
-TEMAS_PALAVRAS = {
+TEMAS_DEFAULT = {
     "🎯 Vale do Javari (prioritário)": [
         "vale do javari", "javari", "atalaia do norte", "univaja", "vale javari"
     ],
@@ -91,8 +88,24 @@ TEMAS_PALAVRAS = {
     ],
 }
 
+# ══════════════════════════════════════════════════════════════════════════════
+#  ESTADO
+# ══════════════════════════════════════════════════════════════════════════════
+if "monitor_config" not in st.session_state:
+    st.session_state.monitor_config = {
+        "fontes": dict(FONTES_DEFAULT),
+        "temas": {k: list(v) for k, v in TEMAS_DEFAULT.items()},
+    }
+if "salvas" not in st.session_state:
+    st.session_state.salvas = {}
+if "fontes_ativas" not in st.session_state:
+    st.session_state.fontes_ativas = list(st.session_state.monitor_config["fontes"].keys())
+
+mcfg = st.session_state.monitor_config
+
+
 # ─── Funções ─────────────────────────────────────────────────────────────────
-@st.cache_data(ttl=900)  # 15 minutos
+@st.cache_data(ttl=900)
 def carregar_feed(nome_fonte, url):
     try:
         feed = feedparser.parse(url)
@@ -108,17 +121,10 @@ def carregar_feed(nome_fonte, url):
                 t = getattr(e, attr, None)
                 if t:
                     try:
-                        data = datetime(*t[:6], tzinfo=timezone.utc)
-                        break
-                    except Exception:
-                        pass
-            entradas.append({
-                "fonte": nome_fonte,
-                "titulo": titulo,
-                "link": link,
-                "resumo": resumo,
-                "data": data,
-            })
+                        data = datetime(*t[:6], tzinfo=timezone.utc); break
+                    except Exception: pass
+            entradas.append({"fonte": nome_fonte, "titulo": titulo, "link": link,
+                             "resumo": resumo, "data": data})
         return entradas
     except Exception as ex:
         return [{"_erro": str(ex), "fonte": nome_fonte}]
@@ -126,117 +132,186 @@ def carregar_feed(nome_fonte, url):
 def carregar_todas(fontes_selecionadas):
     todas, erros = [], []
     for nome in fontes_selecionadas:
-        url = FONTES[nome]
-        itens = carregar_feed(nome, url)
-        for it in itens:
-            if "_erro" in it:
-                erros.append((it["fonte"], it["_erro"]))
-            else:
-                todas.append(it)
+        url = mcfg["fontes"].get(nome)
+        if not url: continue
+        for it in carregar_feed(nome, url):
+            if "_erro" in it: erros.append((it["fonte"], it["_erro"]))
+            else: todas.append(it)
     todas.sort(key=lambda x: x["data"] or datetime(1970,1,1, tzinfo=timezone.utc), reverse=True)
     return todas, erros
 
 def filtrar_por_palavras(itens, palavras):
-    if not palavras:
-        return itens
-    palavras_lower = [p.lower() for p in palavras]
-    out = []
-    for it in itens:
-        texto = (it["titulo"] + " " + it["resumo"]).lower()
-        if any(p in texto for p in palavras_lower):
-            out.append(it)
-    return out
+    if not palavras: return itens
+    p_lower = [p.lower() for p in palavras]
+    return [it for it in itens if any(p in (it["titulo"]+" "+it["resumo"]).lower() for p in p_lower)]
 
 def filtrar_por_data(itens, dias):
-    if dias is None:
-        return itens
+    if dias is None: return itens
     corte = datetime.now(timezone.utc) - timedelta(days=dias)
     return [it for it in itens if it["data"] and it["data"] >= corte]
 
 def fmt_data(d):
-    if not d:
-        return "sem data"
-    agora = datetime.now(timezone.utc)
-    delta = agora - d
-    if delta.days >= 1:
-        return f"há {delta.days} dia{'s' if delta.days > 1 else ''}"
+    if not d: return "sem data"
+    delta = datetime.now(timezone.utc) - d
+    if delta.days >= 1: return f"há {delta.days} dia{'s' if delta.days > 1 else ''}"
     h = delta.seconds // 3600
-    if h >= 1:
-        return f"há {h} hora{'s' if h > 1 else ''}"
+    if h >= 1: return f"há {h} hora{'s' if h > 1 else ''}"
     m = max(1, delta.seconds // 60)
     return f"há {m} min"
 
 def identificar_tags(item):
     tags = []
     texto = (item["titulo"] + " " + item["resumo"]).lower()
-    for tema, palavras in TEMAS_PALAVRAS.items():
-        if any(p in texto for p in palavras):
+    for tema, palavras in mcfg["temas"].items():
+        if any(p.lower() in texto for p in palavras):
             tags.append(tema)
     return tags
 
-# ─── Estado de sessão ────────────────────────────────────────────────────────
-if "salvas" not in st.session_state:
-    st.session_state.salvas = {}
-if "fontes_ativas" not in st.session_state:
-    st.session_state.fontes_ativas = list(FONTES.keys())
 
-# ─── Sidebar — filtros ───────────────────────────────────────────────────────
+# ─── Sidebar ─────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("### 🔍 Filtros")
 
-    periodo_label = st.selectbox(
-        "Período",
+    periodo_label = st.selectbox("Período",
         ["Últimas 24h", "Últimos 3 dias", "Última semana", "Últimas 2 semanas", "Sem filtro"],
-        index=2,
-    )
-    periodo_map = {
-        "Últimas 24h": 1, "Últimos 3 dias": 3, "Última semana": 7,
-        "Últimas 2 semanas": 14, "Sem filtro": None,
-    }
+        index=2)
+    periodo_map = {"Últimas 24h": 1, "Últimos 3 dias": 3, "Última semana": 7,
+                   "Últimas 2 semanas": 14, "Sem filtro": None}
     dias = periodo_map[periodo_label]
 
     st.markdown("**Temas de interesse**")
     temas_sel = []
-    for tema in TEMAS_PALAVRAS.keys():
+    for tema in mcfg["temas"].keys():
         if st.checkbox(tema, value=("Vale do Javari" in tema), key=f"t_{tema}"):
             temas_sel.append(tema)
 
-    palavras_extra_raw = st.text_input(
-        "Palavras extras (separadas por vírgula)",
-        placeholder="ex: marubo, kanamari, korubo"
-    )
+    palavras_extra_raw = st.text_input("Palavras extras (separadas por vírgula)",
+        placeholder="ex: marubo, kanamari, korubo")
     palavras_extra = [p.strip() for p in palavras_extra_raw.split(",") if p.strip()]
 
     st.markdown("---")
     st.markdown("**Fontes ativas**")
     fontes_ativas = []
-    for nome in FONTES.keys():
-        if st.checkbox(nome, value=(nome in st.session_state.fontes_ativas), key=f"f_{nome}"):
+    for nome in mcfg["fontes"].keys():
+        ativo = nome in st.session_state.fontes_ativas
+        if st.checkbox(nome, value=ativo, key=f"f_{nome}"):
             fontes_ativas.append(nome)
     st.session_state.fontes_ativas = fontes_ativas
 
     st.markdown("---")
     if st.button("🔄 Atualizar agora", use_container_width=True):
-        st.cache_data.clear()
-        st.rerun()
+        st.cache_data.clear(); st.rerun()
     st.caption("Cache de 15 min.")
 
-# ─── Palavras-chave combinadas ───────────────────────────────────────────────
+    st.markdown("---")
+    st.markdown("### 💾 Backup config")
+    cfg_export = json.dumps(mcfg, ensure_ascii=False, indent=2)
+    st.download_button("📥 Baixar config", cfg_export,
+        file_name=f"monitor_config_{datetime.now().date().isoformat()}.json",
+        mime="application/json", use_container_width=True)
+
+    arq = st.file_uploader("📤 Importar config", type=["json"], label_visibility="collapsed")
+    if arq is not None:
+        try:
+            data = json.loads(arq.read())
+            if isinstance(data, dict) and "fontes" in data and "temas" in data:
+                if st.button("Confirmar importação", type="primary"):
+                    st.session_state.monitor_config = data
+                    st.session_state.fontes_ativas = list(data["fontes"].keys())
+                    st.success("✅ Configuração importada!")
+                    st.rerun()
+            else:
+                st.error("JSON inválido — precisa ter chaves 'fontes' e 'temas'.")
+        except Exception as ex:
+            st.error(f"Erro: {ex}")
+
+
 palavras_filtro = []
 for tema in temas_sel:
-    palavras_filtro.extend(TEMAS_PALAVRAS[tema])
+    palavras_filtro.extend(mcfg["temas"].get(tema, []))
 palavras_filtro.extend(palavras_extra)
 
+
 # ══════════════════════════════════════════════════════════════════════════════
-#  ABAS
+#  ABAS — Como usar PRIMEIRO
 # ══════════════════════════════════════════════════════════════════════════════
-aba_n, aba_t, aba_s, aba_e, aba_a = st.tabs([
+aba_h, aba_n, aba_t, aba_s, aba_e, aba_cfg = st.tabs([
+    "ℹ️ Como usar",
     "📰 Notícias",
     "📈 Trends",
     "⭐ Salvas para reunião",
     "📤 Exportar",
-    "ℹ️ Sobre",
+    "⚙️ Configurações",
 ])
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  ABA — COMO USAR
+# ──────────────────────────────────────────────────────────────────────────────
+with aba_h:
+    st.markdown(section_title("Como usar o Monitor", "padrao"), unsafe_allow_html=True)
+
+    col1, col2 = st.columns([1.3, 1])
+    with col1:
+        st.markdown(f"""
+        ### 🎯 Para que serve
+        O **Monitor UNIVAJA** coleta automaticamente notícias de **mídia indígena, ambiental
+        e geral**, filtra pelos temas de interesse da UNIVAJA e ajuda os comunicadores a
+        preparar pautas para a reunião de segunda.
+
+        ### 📋 Fluxo recomendado
+
+        <div class="card card-vermelho">
+            <strong style="color:{PRIMARIA};text-transform:uppercase;letter-spacing:0.5px">1. Domingo / Segunda cedo</strong>
+            <p style="font-size:13px;margin-top:8px;line-height:1.6;color:{CINZA}">
+            Comunicador da semana abre a aba <strong>📰 Notícias</strong>, marca os temas de interesse
+            na sidebar, define o período e percorre as matérias mais relevantes.
+            Salva 5–10 com a estrelinha ☆.
+            </p>
+        </div>
+
+        <div class="card card-verde">
+            <strong style="color:{VERDE};text-transform:uppercase;letter-spacing:0.5px">2. Reunião de segunda</strong>
+            <p style="font-size:13px;margin-top:8px;line-height:1.6;color:{CINZA}">
+            Vai em <strong>⭐ Salvas</strong>, mostra na tela e propõe as pautas. Em
+            <strong>📤 Exportar</strong>, baixa o documento em TXT ou Markdown e cola no grupo ASCOM.
+            </p>
+        </div>
+
+        <div class="card card-azul">
+            <strong style="color:{VERDE_PRETO};text-transform:uppercase;letter-spacing:0.5px">3. Durante a produção</strong>
+            <p style="font-size:13px;margin-top:8px;line-height:1.6;color:{CINZA}">
+            Use a aba <strong>📈 Trends</strong> para entender o que está em alta no Brasil e
+            justificar a escolha de pauta. Use as notícias salvas para embasar cards e roteiros.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("### 💡 Dicas")
+        dicas = [
+            ("⚙️ Tudo é customizável",
+             "Na aba <strong>⚙️ Configurações</strong> você adiciona/remove fontes RSS e temas com suas próprias palavras-chave."),
+            ("🔄 Cache de 15 min",
+             "As notícias ficam em cache por 15 minutos para o app ser rápido. Use <strong>🔄 Atualizar agora</strong> na sidebar se precisar forçar."),
+            ("⭐ Salvar é só para você",
+             "As estrelinhas são guardadas no seu navegador. Para compartilhar, use <strong>📤 Exportar</strong>."),
+            ("🎯 Tag prioritária",
+             "Quando uma notícia toca em <strong>Vale do Javari</strong>, a tag aparece em vermelho — atenção máxima."),
+            ("➕ Palavras extras",
+             "Use o campo na sidebar para refinar a busca com termos pontuais (ex: nome de uma liderança, lugar específico)."),
+        ]
+        for titulo, desc in dicas:
+            st.markdown(f"""
+            <div class="card-grafismo" style="margin-bottom:10px">
+                <div class="card-grafismo-conteudo">
+                    <strong style="font-size:13px;color:{VERDE_PRETO};text-transform:uppercase;letter-spacing:0.5px">{titulo}</strong>
+                    <p style="font-size:12px;margin-top:6px;line-height:1.5;color:{CINZA}">{desc}</p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown(divisor("marubo"), unsafe_allow_html=True)
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 #  ABA — NOTÍCIAS
@@ -257,20 +332,16 @@ with aba_n:
         itens_periodo = filtrar_por_data(itens, dias)
         itens_filtrados = filtrar_por_palavras(itens_periodo, palavras_filtro)
 
-        # Stats
         col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.markdown(f"""<div class="stat-card"><div class="stat-num">{len(itens)}</div>
-                <div class="stat-label">Total coletado</div></div>""", unsafe_allow_html=True)
-        with col2:
-            st.markdown(f"""<div class="stat-card"><div class="stat-num">{len(itens_periodo)}</div>
-                <div class="stat-label">No período</div></div>""", unsafe_allow_html=True)
-        with col3:
-            st.markdown(f"""<div class="stat-card"><div class="stat-num">{len(itens_filtrados)}</div>
-                <div class="stat-label">Após filtros</div></div>""", unsafe_allow_html=True)
-        with col4:
-            st.markdown(f"""<div class="stat-card"><div class="stat-num">{len(st.session_state.salvas)}</div>
-                <div class="stat-label">Salvas</div></div>""", unsafe_allow_html=True)
+        for col, val, label in [
+            (col1, len(itens), "Total coletado"),
+            (col2, len(itens_periodo), "No período"),
+            (col3, len(itens_filtrados), "Após filtros"),
+            (col4, len(st.session_state.salvas), "Salvas"),
+        ]:
+            with col:
+                st.markdown(f"""<div class="stat-card"><div class="stat-num">{val}</div>
+                    <div class="stat-label">{label}</div></div>""", unsafe_allow_html=True)
 
         st.markdown(divisor("marubo"), unsafe_allow_html=True)
 
@@ -283,7 +354,7 @@ with aba_n:
             st.markdown("""
             <div class="alerta">
                 📭 Nenhuma notícia corresponde aos filtros atuais.
-                Tente ampliar o período, marcar mais temas ou adicionar palavras-chave.
+                Amplie o período, marque mais temas ou adicione palavras-chave.
             </div>
             """, unsafe_allow_html=True)
         else:
@@ -292,10 +363,7 @@ with aba_n:
 
             por_pagina = 20
             total_paginas = max(1, (len(itens_filtrados) + por_pagina - 1) // por_pagina)
-            if total_paginas > 1:
-                pagina = st.selectbox("Página", list(range(1, total_paginas + 1)), key="pag_n")
-            else:
-                pagina = 1
+            pagina = st.selectbox("Página", list(range(1, total_paginas + 1)), key="pag_n") if total_paginas > 1 else 1
             ini = (pagina - 1) * por_pagina
             fim = ini + por_pagina
 
@@ -325,22 +393,23 @@ with aba_n:
                 with col_btn:
                     label = "★" if salva else "☆"
                     if st.button(label, key=f"star_{hash(card_id)}", help="Salvar para reunião"):
-                        if salva:
-                            st.session_state.salvas.pop(card_id, None)
-                        else:
-                            st.session_state.salvas[card_id] = it
+                        if salva: st.session_state.salvas.pop(card_id, None)
+                        else: st.session_state.salvas[card_id] = it
                         st.rerun()
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 #  ABA — TRENDS
 # ──────────────────────────────────────────────────────────────────────────────
 with aba_t:
     st.markdown(section_title("O que está em alta no Brasil", "verde"), unsafe_allow_html=True)
-    st.caption("Use o Google Trends para entender qual tema tem mais buscas e priorizar pautas em alta.")
+    st.caption("Use o Google Trends para priorizar pautas em alta.")
 
     termos_trends = []
     for tema in temas_sel:
-        termos_trends.append(TEMAS_PALAVRAS[tema][0])
+        palavras = mcfg["temas"].get(tema, [])
+        if palavras:
+            termos_trends.append(palavras[0])
     termos_trends.extend(palavras_extra)
     termos_trends = list(dict.fromkeys(termos_trends))[:5]
 
@@ -353,14 +422,12 @@ with aba_t:
         """, unsafe_allow_html=True)
 
     pills = " ".join([f'<span class="termo-pill">{t}</span>' for t in termos_trends])
-    st.markdown(f"<div style='margin:10px 0'><strong style='color:{VERDE_PRETO}'>Termos no comparativo:</strong><br>{pills}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='margin:10px 0'><strong style='color:{VERDE_PRETO}'>Termos no comparativo:</strong><br>{pills}</div>",
+                unsafe_allow_html=True)
 
     periodo_trends_map = {
-        "Últimas 24h": "now 1-d",
-        "Últimos 3 dias": "now 7-d",
-        "Última semana": "now 7-d",
-        "Últimas 2 semanas": "today 1-m",
-        "Sem filtro": "today 12-m",
+        "Últimas 24h": "now 1-d", "Últimos 3 dias": "now 7-d",
+        "Última semana": "now 7-d", "Últimas 2 semanas": "today 1-m", "Sem filtro": "today 12-m",
     }
     periodo_tr = periodo_trends_map.get(periodo_label, "today 1-m")
 
@@ -398,10 +465,8 @@ with aba_t:
     st.markdown(section_title("Buscas em portais de notícia", "vermelho"), unsafe_allow_html=True)
 
     q_news = " OR ".join([f'"{t}"' for t in termos_trends[:3]])
-    qdr_map = {
-        "Últimas 24h": "d", "Últimos 3 dias": "w", "Última semana": "w",
-        "Últimas 2 semanas": "m", "Sem filtro": "y",
-    }
+    qdr_map = {"Últimas 24h": "d", "Últimos 3 dias": "w", "Última semana": "w",
+               "Últimas 2 semanas": "m", "Sem filtro": "y"}
     qdr = qdr_map.get(periodo_label, "w")
     url_gnews = f"https://news.google.com/search?q={quote_plus(q_news)}&hl=pt-BR&gl=BR&ceid=BR:pt-BR&as_qdr={qdr}"
     url_gsearch = f"https://www.google.com/search?q={quote_plus(q_news)}&tbm=nws&hl=pt-BR&tbs=qdr:{qdr}"
@@ -430,25 +495,24 @@ with aba_t:
     </div>
     """, unsafe_allow_html=True)
 
+
 # ──────────────────────────────────────────────────────────────────────────────
 #  ABA — SALVAS
 # ──────────────────────────────────────────────────────────────────────────────
 with aba_s:
     st.markdown(section_title("Notícias salvas para a reunião", "vermelho"), unsafe_allow_html=True)
-    st.caption("Itens marcados com ☆ na aba Notícias. Use para preparar a pauta da reunião de segunda.")
+    st.caption("Itens marcados com ☆ na aba Notícias.")
 
     if not st.session_state.salvas:
         st.markdown("""
         <div class="alerta">
-            📌 Nenhuma notícia salva ainda. Vá em <strong>📰 Notícias</strong> e clique em ☆ ao lado das matérias relevantes.
+            📌 Nenhuma notícia salva ainda. Vá em <strong>📰 Notícias</strong> e clique em ☆.
         </div>
         """, unsafe_allow_html=True)
     else:
         st.markdown(f"**{len(st.session_state.salvas)} notícia(s) salva(s)**")
-
         if st.button("🗑️ Limpar todas", type="secondary"):
-            st.session_state.salvas = {}
-            st.rerun()
+            st.session_state.salvas = {}; st.rerun()
 
         for link, it in list(st.session_state.salvas.items()):
             st.markdown(f"""
@@ -462,15 +526,14 @@ with aba_s:
             </div>
             """, unsafe_allow_html=True)
             if st.button(f"❌ Remover", key=f"rem_{hash(link)}"):
-                st.session_state.salvas.pop(link, None)
-                st.rerun()
+                st.session_state.salvas.pop(link, None); st.rerun()
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 #  ABA — EXPORTAR
 # ──────────────────────────────────────────────────────────────────────────────
 with aba_e:
     st.markdown(section_title("Exportar pauta para a reunião", "padrao"), unsafe_allow_html=True)
-    st.caption("Gera um documento com as notícias salvas, pronto para colar no grupo ASCOM.")
 
     if not st.session_state.salvas:
         st.markdown("""
@@ -489,24 +552,19 @@ with aba_e:
         for i, (link, it) in enumerate(st.session_state.salvas.items(), 1):
             linhas.append(f"{i}. {it['titulo']}")
             linhas.append(f"   Fonte: {it['fonte']} · {fmt_data(it['data'])}")
-            if it["resumo"]:
-                linhas.append(f"   Resumo: {it['resumo']}")
-            linhas.append(f"   Link: {it['link']}")
-            linhas.append("")
+            if it["resumo"]: linhas.append(f"   Resumo: {it['resumo']}")
+            linhas.append(f"   Link: {it['link']}"); linhas.append("")
         texto = "\n".join(linhas)
 
         md_linhas = [
             "# 📋 Pautas sugeridas — UNIVAJA ASCOM",
             f"**Reunião de segunda · {hoje}**  ",
-            f"_{len(st.session_state.salvas)} matérias_",
-            "",
-            "---",
+            f"_{len(st.session_state.salvas)} matérias_", "", "---",
         ]
         for i, (link, it) in enumerate(st.session_state.salvas.items(), 1):
             md_linhas.append(f"## {i}. [{it['titulo']}]({it['link']})")
             md_linhas.append(f"**{it['fonte']}** · _{fmt_data(it['data'])}_  ")
-            if it["resumo"]:
-                md_linhas.append(f"> {it['resumo']}")
+            if it["resumo"]: md_linhas.append(f"> {it['resumo']}")
             md_linhas.append("")
         md = "\n".join(md_linhas)
 
@@ -519,79 +577,125 @@ with aba_e:
 
         col_d1, col_d2, col_d3 = st.columns(3)
         with col_d1:
-            st.download_button(
-                "📄 Baixar TXT", texto,
+            st.download_button("📄 Baixar TXT", texto,
                 file_name=f"pautas_univaja_{hoje.replace('/','-')}.txt",
-                mime="text/plain", use_container_width=True,
-            )
+                mime="text/plain", use_container_width=True)
         with col_d2:
-            st.download_button(
-                "📝 Baixar Markdown", md,
+            st.download_button("📝 Baixar Markdown", md,
                 file_name=f"pautas_univaja_{hoje.replace('/','-')}.md",
-                mime="text/markdown", use_container_width=True,
-            )
+                mime="text/markdown", use_container_width=True)
         with col_d3:
-            st.download_button(
-                "🗂️ Baixar JSON", export_json,
+            st.download_button("🗂️ Baixar JSON", export_json,
                 file_name=f"pautas_univaja_{hoje.replace('/','-')}.json",
-                mime="application/json", use_container_width=True,
-            )
+                mime="application/json", use_container_width=True)
 
         st.markdown("#### 👁️ Pré-visualização")
         st.text_area("", texto, height=400, label_visibility="collapsed")
 
+
 # ──────────────────────────────────────────────────────────────────────────────
-#  ABA — SOBRE
+#  ABA — CONFIGURAÇÕES
 # ──────────────────────────────────────────────────────────────────────────────
-with aba_a:
-    st.markdown(section_title("Sobre esta plataforma", "verde"), unsafe_allow_html=True)
-    col1, col2 = st.columns([1.3, 1])
-    with col1:
-        st.markdown("""
-        **Monitor UNIVAJA** é uma plataforma de coleta automatizada de notícias e tendências
-        feita para a ASCOM da UNIVAJA. Ela:
+with aba_cfg:
+    st.markdown(section_title("Configurações do Monitor", "padrao"), unsafe_allow_html=True)
+    st.caption("Tudo é customizável. Adicione/remova fontes RSS e temas com suas próprias palavras-chave.")
 
-        - 📥 **Coleta automaticamente** notícias de 12+ fontes (mídia indígena, ambiental e geral)
-        - 🎯 **Filtra por tema** usando palavras-chave dos temas prioritários da UNIVAJA
-        - ⭐ **Permite salvar** matérias relevantes para a pauta da reunião de segunda
-        - 📤 **Exporta a pauta** em TXT, Markdown ou JSON
-        - 📈 **Conecta com o Google Trends** para entender o que está em alta
+    st.markdown(f"""
+    <div class="alerta alerta-azul">
+        💡 <strong>Atenção:</strong> as mudanças valem para a sessão atual. Baixe o JSON na sidebar
+        para preservar suas configurações entre acessos.
+    </div>
+    """, unsafe_allow_html=True)
 
-        ### ⏰ Quando usar
-        - **Domingo / Segunda cedo:** comunicador da semana abre a aba 📰 Notícias,
-          filtra pelos temas relevantes, salva 5–10 matérias e exporta para levar à reunião.
-        - **Terça e quarta:** durante a produção, usa as notícias salvas para embasar
-          cards e roteiros.
-        - **Quinzenal:** ponto focal apresenta o consolidado de pautas relevantes
-          para a coordenação.
+    # FONTES RSS
+    st.markdown(divisor("zig"), unsafe_allow_html=True)
+    st.markdown("### 📡 Fontes RSS")
+    st.caption("Cada linha: NOME | URL — separados pelo caractere `|`.")
 
-        ### 🎨 Identidade visual
-        Esta plataforma segue o **Manual de Marca UNIVAJA**, incorporando os grafismos
-        dos povos do Vale do Javari — Marubo (meander), Kanamari (ziguezagues),
-        Matis (losangos), Kulina (chevrons) e Mayuruna — nas bordas, divisores
-        e elementos decorativos.
+    fontes_txt_default = "\n".join([f"{nome} | {url}" for nome, url in mcfg["fontes"].items()])
+    fontes_txt = st.text_area("Fontes (NOME | URL por linha)",
+        value=fontes_txt_default, height=320, label_visibility="collapsed", key="cfg_fontes")
 
-        ### 🔄 Atualização
-        O cache é de 15 minutos. Para forçar atualização imediata, use o botão
-        **🔄 Atualizar agora** na barra lateral.
-        """)
-    with col2:
-        st.markdown(section_title("Publicação no Streamlit", "padrao"), unsafe_allow_html=True)
-        st.markdown("""
-        1. Suba os arquivos em um repositório GitHub
-        2. Em [share.streamlit.io](https://share.streamlit.io), conecte o repositório
-        3. Selecione `monitor_univaja.py` como entry point
-        4. Clique em Deploy — em 2 minutos está no ar
+    with st.expander("➕ Adicionar uma nova fonte rapidamente"):
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            novo_nome = st.text_input("Nome da fonte", placeholder="ex: Folha de SP")
+        with col_f2:
+            novo_url = st.text_input("URL do feed RSS",
+                placeholder="ex: https://feeds.folha.uol.com.br/poder/rss091.xml")
+        if st.button("Adicionar fonte", use_container_width=True):
+            if novo_nome and novo_url:
+                mcfg["fontes"][novo_nome.strip()] = novo_url.strip()
+                if novo_nome.strip() not in st.session_state.fontes_ativas:
+                    st.session_state.fontes_ativas.append(novo_nome.strip())
+                st.success(f"✅ Fonte '{novo_nome}' adicionada!")
+                st.rerun()
 
-        **Arquivos necessários:**
-        - `monitor_univaja.py`
-        - `univaja_brand.py`
-        - `requirements.txt`
+    # TEMAS
+    st.markdown(divisor("zig"), unsafe_allow_html=True)
+    st.markdown("### 🎯 Temas e palavras-chave")
+    st.caption("Para cada tema, defina as palavras-chave que disparam o reconhecimento. Use o formato `TEMA: palavra1, palavra2, palavra3`.")
 
-        ### 📚 Fontes ativas
-        """)
-        for nome in FONTES.keys():
-            st.markdown(f"- {nome}")
+    temas_txt_default = "\n".join([
+        f"{tema}: {', '.join(palavras)}" for tema, palavras in mcfg["temas"].items()
+    ])
+    temas_txt = st.text_area("Temas (TEMA: palavra1, palavra2 por linha)",
+        value=temas_txt_default, height=380, label_visibility="collapsed", key="cfg_temas")
+
+    with st.expander("➕ Adicionar um novo tema rapidamente"):
+        novo_tema = st.text_input("Nome do tema (com emoji opcional)",
+            placeholder="ex: 🏞️ Áreas protegidas")
+        novas_palavras = st.text_input("Palavras-chave (separadas por vírgula)",
+            placeholder="ex: unidade de conservação, reserva extrativista")
+        if st.button("Adicionar tema", use_container_width=True):
+            if novo_tema and novas_palavras:
+                mcfg["temas"][novo_tema.strip()] = [p.strip() for p in novas_palavras.split(",") if p.strip()]
+                st.success(f"✅ Tema '{novo_tema}' adicionado!")
+                st.rerun()
+
+    st.markdown(divisor("pontos"), unsafe_allow_html=True)
+
+    col_s1, col_s2 = st.columns([3, 1])
+    with col_s1:
+        if st.button("💾 Salvar todas as configurações", type="primary", use_container_width=True):
+            # Parsear fontes
+            novas_fontes = {}
+            for linha in fontes_txt.split("\n"):
+                if "|" in linha:
+                    nome, url = linha.split("|", 1)
+                    nome, url = nome.strip(), url.strip()
+                    if nome and url:
+                        novas_fontes[nome] = url
+            # Parsear temas
+            novos_temas = {}
+            for linha in temas_txt.split("\n"):
+                if ":" in linha:
+                    tema, palavras = linha.split(":", 1)
+                    tema = tema.strip()
+                    pal_list = [p.strip() for p in palavras.split(",") if p.strip()]
+                    if tema and pal_list:
+                        novos_temas[tema] = pal_list
+
+            mcfg["fontes"] = novas_fontes
+            mcfg["temas"] = novos_temas
+            # Atualiza fontes ativas
+            st.session_state.fontes_ativas = [n for n in st.session_state.fontes_ativas if n in novas_fontes]
+            for n in novas_fontes:
+                if n not in st.session_state.fontes_ativas:
+                    st.session_state.fontes_ativas.append(n)
+            st.cache_data.clear()
+            st.success("✅ Configurações salvas! Baixe o JSON na sidebar para preservar.")
+            st.rerun()
+
+    with col_s2:
+        if st.button("↺ Resetar aos padrões", use_container_width=True):
+            st.session_state.monitor_config = {
+                "fontes": dict(FONTES_DEFAULT),
+                "temas": {k: list(v) for k, v in TEMAS_DEFAULT.items()},
+            }
+            st.session_state.fontes_ativas = list(FONTES_DEFAULT.keys())
+            st.cache_data.clear()
+            st.rerun()
 
     st.markdown(divisor("marubo"), unsafe_allow_html=True)
-    st.caption("Monitor UNIVAJA · ASCOM · 2026 — uso interno · Grafismos inspirados nos povos do Vale do Javari")
+    st.caption("Monitor UNIVAJA · ASCOM · 2026 — uso interno · Identidade visual baseada no Manual de Marca UNIVAJA")

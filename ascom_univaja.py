@@ -30,12 +30,12 @@ st.markdown(
 )
 
 # ─── Abas ─────────────────────────────────────────────────────────────────────
-aba1, aba2, aba3, aba4, aba5 = st.tabs([
+aba5, aba1, aba2, aba3, aba4 = st.tabs([
+    "ℹ️ Como usar",
     "📋 Fluxos integrados",
     "📖 Glossário & referência",
     "📅 Agenda semanal",
     "🔍 Monitor de pautas",
-    "ℹ️ Como usar",
 ])
 
 
@@ -640,7 +640,7 @@ with aba4:
 
     st.markdown("#### 1 · Selecione os temas")
 
-    TEMAS = {
+    TEMAS_MONITOR_DEFAULT = {
         "Povos isolados": {"tag": "pauta permanente", "badge": "badge-perm",
             "termos": ["povos isolados Vale do Javari", "isolados voluntários Amazônia", "FUNAI isolados"]},
         "Garimpo e invasão": {"tag": "denúncia / vigilância", "badge": "badge-den",
@@ -666,6 +666,10 @@ with aba4:
         "Atalaia do Norte": {"tag": "local", "badge": "badge-local",
             "termos": ["Atalaia do Norte notícias", "Amazonas terra indígena", "Vale do Javari município"]},
     }
+
+    if "temas_monitor" not in st.session_state:
+        st.session_state.temas_monitor = {k: dict(v) for k, v in TEMAS_MONITOR_DEFAULT.items()}
+    TEMAS = st.session_state.temas_monitor
 
     cols_temas = st.columns(4)
     selecionados_temas = []
@@ -794,6 +798,79 @@ with aba4:
         </div>
         """, unsafe_allow_html=True)
 
+    # ── Editor de temas ─────────────────────────────────────────────────────
+    st.markdown(divisor("marubo"), unsafe_allow_html=True)
+    st.markdown("#### ⚙️ Personalizar temas e termos de busca")
+    st.caption("Edite os temas e os termos que vão para o Google Notícias e Google Trends. Funciona para a sessão atual; baixe o JSON para preservar.")
+
+    with st.expander("✏️ Editar temas existentes", expanded=False):
+        st.caption("Formato: `TEMA: termo1, termo2, termo3` — um tema por linha.")
+        temas_atuais_txt = "\n".join([
+            f"{tema}: {', '.join(info['termos'])}" for tema, info in TEMAS.items()
+        ])
+        editor = st.text_area("Temas e termos",
+            value=temas_atuais_txt, height=320, label_visibility="collapsed",
+            key="editor_temas_monitor")
+
+        col_save, col_reset = st.columns([3, 1])
+        with col_save:
+            if st.button("💾 Salvar alterações nos temas", type="primary", use_container_width=True):
+                novos = {}
+                for linha in editor.split("\n"):
+                    if ":" in linha:
+                        tema, termos = linha.split(":", 1)
+                        tema = tema.strip()
+                        termos_list = [t.strip() for t in termos.split(",") if t.strip()]
+                        if tema and termos_list:
+                            # preserva tag/badge se já existia
+                            tag_antigo = TEMAS.get(tema, {}).get("tag", "personalizado")
+                            badge_antigo = TEMAS.get(tema, {}).get("badge", "badge-perm")
+                            novos[tema] = {"tag": tag_antigo, "badge": badge_antigo, "termos": termos_list}
+                st.session_state.temas_monitor = novos
+                st.success("✅ Temas atualizados!")
+                st.rerun()
+        with col_reset:
+            if st.button("↺ Resetar", use_container_width=True):
+                st.session_state.temas_monitor = {k: dict(v) for k, v in TEMAS_MONITOR_DEFAULT.items()}
+                st.rerun()
+
+    with st.expander("➕ Adicionar um novo tema"):
+        col_n1, col_n2 = st.columns(2)
+        with col_n1:
+            novo_tema_nome = st.text_input("Nome do tema", placeholder="ex: Festival cultural")
+        with col_n2:
+            novo_tema_termos = st.text_input("Termos (separados por vírgula)",
+                placeholder="ex: festival yoxin, ritual marubo")
+        if st.button("Adicionar tema", use_container_width=True):
+            if novo_tema_nome and novo_tema_termos:
+                termos_list = [t.strip() for t in novo_tema_termos.split(",") if t.strip()]
+                st.session_state.temas_monitor[novo_tema_nome.strip()] = {
+                    "tag": "personalizado", "badge": "badge-perm", "termos": termos_list,
+                }
+                st.success(f"✅ Tema '{novo_tema_nome}' adicionado!")
+                st.rerun()
+
+    # Backup
+    import json as _json
+    cfg_export = _json.dumps(st.session_state.temas_monitor, ensure_ascii=False, indent=2)
+    col_bk1, col_bk2 = st.columns(2)
+    with col_bk1:
+        st.download_button("📥 Baixar temas (JSON)", cfg_export,
+            file_name=f"temas_monitor_univaja.json", mime="application/json",
+            use_container_width=True)
+    with col_bk2:
+        arq_t = st.file_uploader("📤 Importar temas", type=["json"],
+            label_visibility="collapsed", key="upload_temas_monitor")
+        if arq_t is not None:
+            try:
+                data = _json.loads(arq_t.read())
+                if isinstance(data, dict):
+                    if st.button("Confirmar importação", key="conf_temas"):
+                        st.session_state.temas_monitor = data
+                        st.success("✅ Temas importados!"); st.rerun()
+            except Exception as ex:
+                st.error(f"Erro: {ex}")
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  ABA 5 — COMO USAR
@@ -843,47 +920,42 @@ with aba5:
             """, unsafe_allow_html=True)
 
     with col_u2:
-        st.markdown("#### Como publicar no Streamlit (passo a passo)")
+        st.markdown("#### 🧰 Outras plataformas UNIVAJA")
+        st.markdown(f"""
+        <div class="card-grafismo" style="margin-bottom:10px">
+            <div class="card-grafismo-conteudo">
+                <strong style="font-size:13px;color:{PRIMARIA};text-transform:uppercase;letter-spacing:0.5px">📰 Monitor UNIVAJA</strong>
+                <p style="font-size:12px;margin-top:6px;line-height:1.5;color:{CINZA}">
+                Coleta automática de notícias por RSS de 12+ fontes de mídia indígena, ambiental e geral.
+                Filtros por tema, salvar favoritas e exportação para a reunião.
+                </p>
+            </div>
+        </div>
+        <div class="card-grafismo" style="margin-bottom:10px">
+            <div class="card-grafismo-conteudo">
+                <strong style="font-size:13px;color:{PRIMARIA};text-transform:uppercase;letter-spacing:0.5px">📋 Planner UNIVAJA</strong>
+                <p style="font-size:12px;margin-top:6px;line-height:1.5;color:{CINZA}">
+                Planejamento editorial colaborativo. Comunicadores propõem pautas, definem cronograma,
+                redes, responsáveis. Notifica a imprensa por email e gera PDF para a reunião.
+                </p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        passos = [
-            ("1", "Criar conta no GitHub", "Acesse github.com e crie uma conta gratuita. O GitHub é onde o código da ferramenta fica guardado.", "https://github.com"),
-            ("2", "Criar conta no Streamlit", "Acesse share.streamlit.io e crie uma conta gratuita (pode usar a conta do Google).", "https://share.streamlit.io"),
-            ("3", "Criar repositório no GitHub", "No GitHub, clique em 'New repository'. Dê o nome 'ascom-univaja'. Deixe como público e clique em 'Create'."),
-            ("4", "Subir os arquivos", "Dentro do repositório criado, clique em 'Add file' → 'Upload files'. Suba os arquivos: ascom_univaja.py, monitor_univaja.py, univaja_brand.py e requirements.txt."),
-            ("5", "Publicar no Streamlit", "No Streamlit, clique em 'New app'. Conecte ao GitHub. Selecione o repositório 'ascom-univaja' e o arquivo 'ascom_univaja.py'. Clique em 'Deploy'."),
-            ("6", "Pronto — copie o link", "Em 2–3 minutos a ferramenta estará no ar com um link fixo como streamlit.app/univaja. Cole esse link no grupo do WhatsApp da equipe."),
+        st.markdown("#### 💡 Princípios da ferramenta")
+        principios = [
+            ("🎨 Identidade", "Segue rigorosamente o Manual de Marca UNIVAJA — cores e grafismos dos povos do Vale."),
+            ("📱 Acessível", "Funciona no navegador de qualquer celular ou computador. Não precisa instalar nada."),
+            ("⚙️ Customizável", "Temas, termos, fontes e templates de email são editáveis pelos comunicadores."),
+            ("🤝 Colaborativa", "Quem usa pode exportar JSON e compartilhar no grupo ASCOM."),
         ]
-
-        for num, titulo_p, desc, *url in passos:
-            link_html = f'<a href="{url[0]}" target="_blank" style="font-size:11px;color:{VERDE_PRETO}">↗ Abrir site</a>' if url else ""
+        for titulo_p, desc in principios:
             st.markdown(f"""
-            <div style="display:flex;gap:10px;margin-bottom:12px;align-items:flex-start">
-                <span style="background:{PRIMARIA};color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;margin-top:2px;border:2px solid white;box-shadow:0 2px 6px rgba(120,11,11,.2)">{num}</span>
-                <div>
-                    <strong style="font-size:13px;color:{VERDE_PRETO}">{titulo_p}</strong> {link_html}
-                    <p style="font-size:12px;color:#6b7280;margin:4px 0 0;line-height:1.5">{desc}</p>
-                </div>
+            <div class="card card-cinza" style="margin-bottom:8px">
+                <strong style="font-size:13px;color:{VERDE_PRETO}">{titulo_p}</strong>
+                <p style="font-size:12px;color:{CINZA};margin:4px 0 0;line-height:1.5">{desc}</p>
             </div>
             """, unsafe_allow_html=True)
-
-        st.markdown("""
-        <div class="alerta alerta-verde">
-            ✅ <strong>É gratuito.</strong> O Streamlit Community Cloud não tem custo.
-            O GitHub também é gratuito para projetos públicos.
-            Não precisa de servidor, hospedagem ou técnico avançado.
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("#### Para atualizar a ferramenta depois")
-        st.markdown("""
-        <div class="card card-cinza">
-            <p style="font-size:13px;line-height:1.6">
-            Quando quiser adicionar um tema novo, mudar uma data ou ajustar o texto,
-            basta editar o arquivo correspondente no GitHub.
-            O Streamlit atualiza automaticamente em poucos segundos.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
 
     st.markdown(divisor("marubo"), unsafe_allow_html=True)
     st.caption("ASCOM UNIVAJA · 2026 — uso interno · Identidade visual baseada no Manual de Marca UNIVAJA")
