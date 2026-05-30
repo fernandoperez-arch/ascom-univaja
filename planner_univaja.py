@@ -16,7 +16,7 @@ import uuid
 from fpdf import FPDF
 
 from univaja_brand import (
-    css_global, header, divisor, section_title,
+    css_global, header, divisor, section_title, flow_kanban, logo_svg, sidebar_logo,
     PRIMARIA, VERMELHO_ESC, VERMELHO_MED, VERMELHO_CLARO,
     VERDE, VERDE_ESC, VERDE_PRETO, VERDE_CLARO,
     CINZA, PRETO, BRANCO, CREME,
@@ -216,6 +216,7 @@ def mailto_url(p: dict) -> str:
 #  SIDEBAR — Filtros + Backup
 # ══════════════════════════════════════════════════════════════════════════════
 with st.sidebar:
+    st.markdown(sidebar_logo(), unsafe_allow_html=True)
     st.markdown("### 🔍 Filtros")
 
     filtro_responsavel = st.text_input("Responsável", placeholder="ex: Fran, Tumi, Débora")
@@ -312,12 +313,13 @@ def aplicar_filtros(pautas):
 # ══════════════════════════════════════════════════════════════════════════════
 #  ABAS — "Como usar" em PRIMEIRO
 # ══════════════════════════════════════════════════════════════════════════════
-aba_h, aba_n, aba_l, aba_c, aba_k, aba_r, aba_cfg = st.tabs([
+aba_h, aba_n, aba_l, aba_c, aba_k, aba_f, aba_r, aba_cfg = st.tabs([
     "ℹ️ Como usar",
     "➕ Nova pauta",
     "📋 Lista de pautas",
     "📅 Cronograma",
     "📊 Kanban (status)",
+    "🔁 Fluxo de produção",
     "📄 Relatório PDF",
     "⚙️ Configurações",
 ])
@@ -794,6 +796,93 @@ with aba_k:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
+#  ABA — FLUXO DE PRODUÇÃO
+# ──────────────────────────────────────────────────────────────────────────────
+def etapa_fluxo(pauta: dict) -> str:
+    """Mapeia o status da pauta para uma etapa do fluxo de publicação."""
+    st_atual = pauta.get("status", "")
+    if "Proposta" in st_atual:                     return "1"
+    if "produção" in st_atual:                     return "3"
+    if "Aguardando" in st_atual:                   return "5"
+    if "Aprovado" in st_atual:                     return "6"
+    if "Publicado" in st_atual:                    return "7"
+    if "Arquivado" in st_atual:                    return "7"
+    return "1"
+
+
+ETAPAS_FLUXO_CARD = [
+    {"num": "1", "titulo": "Proposta",   "responsavel": "Comunicador designado",   "entrega": "Tema na reunião",       "cor": VERDE},
+    {"num": "2", "titulo": "Briefing",   "responsavel": "Comunicador → Designer",  "entrega": "Briefing no grupo",     "cor": VERDE},
+    {"num": "3", "titulo": "Design",     "responsavel": "Designer",                "entrega": "Card finalizado",       "cor": VERDE},
+    {"num": "4", "titulo": "Legenda",    "responsavel": "Comunicador responsável", "entrega": "Texto + hashtags",      "cor": VERDE},
+    {"num": "5", "titulo": "Aprovação",  "responsavel": "Ponto focal → Coordenação", "entrega": "Aprovação registrada","cor": VERMELHO_MED},
+    {"num": "6", "titulo": "Aprovado",   "responsavel": "Coordenação ASCOM",       "entrega": "Pronto para publicar",  "cor": VERDE_ESC},
+    {"num": "7", "titulo": "Publicação", "responsavel": "TUMI / DÉBORA",           "entrega": "✅ Publicado nas redes","cor": PRIMARIA},
+]
+
+
+with aba_f:
+    st.markdown(section_title("Fluxo de produção das pautas", "verde"), unsafe_allow_html=True)
+    st.caption("Visualize cada pauta no estágio em que ela está dentro do fluxo de publicação da ASCOM.")
+
+    st.markdown("##### 📊 Etapas do fluxo")
+    st.markdown(flow_kanban(ETAPAS_FLUXO_CARD), unsafe_allow_html=True)
+
+    st.markdown(divisor("zig"), unsafe_allow_html=True)
+    st.markdown("##### 📌 Suas pautas em cada etapa")
+
+    pautas_filt = aplicar_filtros(st.session_state.pautas)
+
+    if not pautas_filt:
+        st.markdown("""
+        <div class="alerta">📭 Nenhuma pauta para mostrar.</div>
+        """, unsafe_allow_html=True)
+    else:
+        # Distribui pautas pelas etapas
+        por_etapa = {e["num"]: [] for e in ETAPAS_FLUXO_CARD}
+        for p in pautas_filt:
+            por_etapa[etapa_fluxo(p)].append(p)
+
+        # Exibe etapas em 3 linhas de até 3 colunas
+        for i0 in range(0, len(ETAPAS_FLUXO_CARD), 3):
+            cols = st.columns(min(3, len(ETAPAS_FLUXO_CARD) - i0))
+            for ci, etapa in enumerate(ETAPAS_FLUXO_CARD[i0:i0+3]):
+                pautas_etapa = por_etapa[etapa["num"]]
+                with cols[ci]:
+                    st.markdown(f"""
+                    <div style="background:{etapa['cor']};color:white;padding:10px 14px;border-radius:8px;margin-bottom:8px;font-weight:700;text-align:center;letter-spacing:0.5px">
+                        <div style="font-size:11px;opacity:.9;text-transform:uppercase">Etapa {etapa['num']}</div>
+                        <div style="font-size:14px;margin-top:2px">{etapa['titulo']}</div>
+                        <div style="font-size:11px;opacity:.9;font-weight:500;margin-top:4px">{len(pautas_etapa)} pauta(s)</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    if not pautas_etapa:
+                        st.markdown("""
+                        <div style="background:white;border:1px dashed #d1d5db;border-radius:8px;padding:14px;text-align:center;font-size:12px;color:#9ca3af;margin-bottom:6px">
+                            (sem pautas nesta etapa)
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                    for p in pautas_etapa:
+                        try:
+                            data_fmt = datetime.fromisoformat(p["data"]).strftime("%d/%m")
+                        except Exception:
+                            data_fmt = p.get("data","")
+                        redes_str = " · ".join(p.get("redes", [])[:2])
+                        st.markdown(f"""
+                        <div style="background:white;border:1px solid #e5e7eb;border-left:3px solid {etapa['cor']};border-radius:6px;padding:10px 12px;margin-bottom:6px">
+                            <div style="font-weight:600;font-size:12px;color:{VERDE_PRETO};line-height:1.3;margin-bottom:4px">{p.get('titulo','(sem título)')[:70]}</div>
+                            <div style="font-size:10px;color:{CINZA}">
+                                📅 {data_fmt} · 👤 {p.get('responsavel','—')}<br>
+                                📡 {redes_str}<br>
+                                <span style="color:#9ca3af">{p.get('status','')}</span>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
 #  ABA — RELATÓRIO PDF
 # ──────────────────────────────────────────────────────────────────────────────
 def gerar_pdf(pautas: list, titulo_reuniao: str, periodo_descr: str, observacoes: str) -> bytes:
@@ -829,7 +918,7 @@ def gerar_pdf(pautas: list, titulo_reuniao: str, periodo_descr: str, observacoes
     # HEADER
     r, g, b = hex_rgb(PRIMARIA)
     pdf.set_fill_color(r, g, b)
-    pdf.rect(0, 0, 210, 38, "F")
+    pdf.rect(0, 0, 210, 42, "F")
 
     # Marubo branco no topo
     pdf.set_draw_color(255, 255, 255)
@@ -840,26 +929,72 @@ def gerar_pdf(pautas: list, titulo_reuniao: str, periodo_descr: str, observacoes
         pdf.line(x+step/2, 8, x+step/2, 5); pdf.line(x+step/2, 5, x+step, 5)
         x += step
 
+    # ── LOGO UNIVAJA — desenhada com primitives (compatível com fpdf2 e PyFPDF) ──
+    cx, cy = 22, 22
+
+    # Círculo branco principal
+    pdf.set_fill_color(255, 255, 255)
+    pdf.set_draw_color(*hex_rgb(VERMELHO_ESC))
+    pdf.set_line_width(0.4)
+    raio = 12
+    pdf.ellipse(cx-raio, cy-raio, raio*2, raio*2, "FD")
+
+    # Maloca como pirâmide vermelha (retângulos empilhados)
+    pdf.set_fill_color(*hex_rgb(PRIMARIA))
+    pdf.rect(cx-1.0, cy-8, 2.0, 1.8, "F")
+    pdf.rect(cx-2.4, cy-6.2, 4.8, 1.8, "F")
+    pdf.rect(cx-3.8, cy-4.4, 7.6, 1.8, "F")
+    pdf.rect(cx-5.2, cy-2.6, 10.4, 1.8, "F")
+    pdf.rect(cx-6.6, cy-0.8, 13.2, 2.0, "F")
+
+    # Solo vermelho escuro (faixa)
+    pdf.set_fill_color(*hex_rgb(VERMELHO_ESC))
+    pdf.rect(cx-7.5, cy+1.4, 15, 0.8, "F")
+
+    # Base verde escuro com greca Marubo
+    pdf.set_fill_color(*hex_rgb(VERDE_PRETO))
+    pdf.rect(cx-7.5, cy+2.2, 15, 5.0, "F")
+
+    # Greca Marubo branca dentro da base
+    pdf.set_draw_color(255, 255, 255)
+    pdf.set_line_width(0.35)
+    bx = cx - 6.5
+    for _ in range(3):
+        pdf.line(bx, cy+6.5, bx, cy+3.5)
+        pdf.line(bx, cy+3.5, bx+1.6, cy+3.5)
+        pdf.line(bx+1.6, cy+3.5, bx+1.6, cy+5.5)
+        pdf.line(bx+1.6, cy+5.5, bx+3.2, cy+5.5)
+        pdf.line(bx+3.2, cy+5.5, bx+3.2, cy+3.5)
+        bx += 4.5
+
+    # Ponto vermelho topo (jacamim)
+    pdf.set_fill_color(*hex_rgb(PRIMARIA))
+    pdf.ellipse(cx-1.0, cy-10.5, 2.0, 2.0, "F")
+
+    # Texto ao lado da logo
     pdf.set_text_color(255, 255, 255)
     pdf.set_font("helvetica", "B", 22)
-    pdf.set_xy(10, 12)
+    pdf.set_xy(40, 11)
     pdf.cell(0, 8, latin("UNIVAJA"), ln=1)
-    pdf.set_font("helvetica", "", 11)
-    pdf.set_x(10)
+    pdf.set_font("helvetica", "", 9)
+    pdf.set_x(40)
+    pdf.cell(0, 4, latin("UNIAO DOS POVOS DO VALE DO JAVARI"), ln=1)
+    pdf.set_font("helvetica", "B", 11)
+    pdf.set_x(40)
     pdf.cell(0, 5, latin("Planejamento editorial - ASCOM"), ln=1)
-    pdf.set_font("helvetica", "I", 9)
-    pdf.set_x(10)
-    pdf.cell(0, 5, latin(f"Gerado em {datetime.now().strftime('%d/%m/%Y %H:%M')}"), ln=1)
+    pdf.set_font("helvetica", "I", 8)
+    pdf.set_x(40)
+    pdf.cell(0, 4, latin(f"Gerado em {datetime.now().strftime('%d/%m/%Y %H:%M')}"), ln=1)
 
-    # Pontos brancos
+    # Pontos brancos Kanamari na base do header
     pdf.set_fill_color(255, 255, 255)
     x = 10
     while x < 200:
-        pdf.ellipse(x, 33, 0.8, 0.8, "F")
-        pdf.ellipse(x+4, 33, 0.8, 0.8, "F")
+        pdf.ellipse(x, 37, 0.8, 0.8, "F")
+        pdf.ellipse(x+4, 37, 0.8, 0.8, "F")
         x += 8
 
-    pdf.set_y(46)
+    pdf.set_y(50)
 
     # TÍTULO
     r, g, b = hex_rgb(VERDE_PRETO)

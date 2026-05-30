@@ -115,6 +115,71 @@ def grafismo_mayuruna_chedebo(cor=PRIMARIA, altura=24):
     return svg_to_url(svg)
 
 
+# ─── LOGO UNIVAJA ─────────────────────────────────────────────────────────────
+def logo_svg(variante: str = "completa", cor_simbolo: str = None, cor_texto: str = None,
+             altura: int = 60) -> str:
+    """
+    Logo UNIVAJA inspirada nos elementos do manual de marca:
+    - Maloca (triângulo) — símbolo de união
+    - Grafismo Marubo (greca) na base
+    - Círculo/cabeça evocando o Jacamim (ave-símbolo)
+
+    Variantes:
+    - 'completa': símbolo + nome + tagline (horizontal)
+    - 'simbolo': só o símbolo (quadrado)
+    - 'compacta': símbolo + nome (sem tagline)
+    """
+    cs = cor_simbolo or PRIMARIA
+    ct = cor_texto or PRIMARIA
+    ct_sec = VERDE
+
+    if variante == "simbolo":
+        svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" style="height:{altura}px;width:{altura}px">
+            <circle cx="32" cy="32" r="30" fill="{cs}"/>
+            <circle cx="32" cy="32" r="30" fill="none" stroke="{VERMELHO_ESC}" stroke-width="1.5"/>
+            <path d="M32 12 L52 38 L12 38 Z" fill="white"/>
+            <rect x="10" y="38" width="44" height="2.5" fill="{VERMELHO_ESC}"/>
+            <rect x="10" y="40.5" width="44" height="13" fill="{VERDE_PRETO}"/>
+            <path d="M14 50 L14 44 L18 44 L18 48 L22 48 L22 44 L26 44 L26 50
+                     M30 50 L30 44 L34 44 L34 48 L38 48 L38 44 L42 44 L42 50
+                     M46 50 L46 44 L50 44 L50 48"
+                  stroke="white" stroke-width="1.3" fill="none" stroke-linecap="square"/>
+            <circle cx="32" cy="22" r="2.2" fill="{cs}"/>
+        </svg>"""
+        return svg
+
+    # Símbolo embutido + texto
+    simbolo = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" style="height:{altura}px;width:{altura}px;flex-shrink:0">
+        <circle cx="32" cy="32" r="30" fill="{cs}"/>
+        <circle cx="32" cy="32" r="30" fill="none" stroke="{VERMELHO_ESC}" stroke-width="1.5"/>
+        <path d="M32 12 L52 38 L12 38 Z" fill="white"/>
+        <rect x="10" y="38" width="44" height="2.5" fill="{VERMELHO_ESC}"/>
+        <rect x="10" y="40.5" width="44" height="13" fill="{VERDE_PRETO}"/>
+        <path d="M14 50 L14 44 L18 44 L18 48 L22 48 L22 44 L26 44 L26 50
+                 M30 50 L30 44 L34 44 L34 48 L38 48 L38 44 L42 44 L42 50
+                 M46 50 L46 44 L50 44 L50 48"
+              stroke="white" stroke-width="1.3" fill="none" stroke-linecap="square"/>
+        <circle cx="32" cy="22" r="2.2" fill="{cs}"/>
+    </svg>"""
+
+    if variante == "compacta":
+        return f"""<div class="logo-univaja">
+            {simbolo}
+            <div class="logo-textos">
+                <div class="logo-nome" style="color:{ct}">UNIVAJA</div>
+            </div>
+        </div>"""
+
+    # completa
+    return f"""<div class="logo-univaja">
+        {simbolo}
+        <div class="logo-textos">
+            <div class="logo-nome" style="color:{ct}">UNIVAJA</div>
+            <div class="logo-tagline" style="color:{ct_sec}">União dos Povos do Vale do Javari</div>
+        </div>
+    </div>"""
+
+
 # ─── CSS GLOBAL — usa os grafismos como elementos decorativos ────────────────
 def css_global():
     """CSS completo com paleta e grafismos UNIVAJA aplicados."""
@@ -135,7 +200,10 @@ def css_global():
 
     return f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Battambang:wght@400;700&display=swap');
+/* Fontes do Manual de Marca UNIVAJA:
+   Principal: Croog Pro (proprietária — não disponível em web)
+   Fallbacks oficiais do manual: Archivo + Battambang (Google Fonts) */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Battambang:wght@400;700&display=swap');
 
 /* ═══ Base ═════════════════════════════════════════════════════════════════ */
 html, body, [class*="css"] {{
@@ -151,11 +219,39 @@ html, body, [class*="css"] {{
     background-size: 160px 160px;
 }}
 
-h1, h2, h3, h4, h5, h6 {{
-    font-family: 'Archivo', sans-serif;
+/* Títulos com Battambang (fallback secundário do manual) */
+h1, h2, h3 {{
+    font-family: 'Battambang', 'Archivo', serif;
     color: {VERDE_PRETO};
     font-weight: 700;
     letter-spacing: -0.01em;
+}}
+h4, h5, h6 {{
+    font-family: 'Archivo', sans-serif;
+    color: {VERDE_PRETO};
+    font-weight: 700;
+}}
+
+/* ═══ Logo UNIVAJA ═══════════════════════════════════════════════════════ */
+.logo-univaja {{
+    display: flex; align-items: center; gap: 14px;
+}}
+.logo-textos {{ display: flex; flex-direction: column; line-height: 1; }}
+.logo-nome {{
+    font-family: 'Battambang', 'Archivo', serif;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: 3px;
+    line-height: 1;
+}}
+.logo-tagline {{
+    font-family: 'Archivo', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    opacity: .9;
 }}
 
 /* ═══ Header UNIVAJA — com grafismos Marubo ═══════════════════════════════ */
@@ -194,8 +290,15 @@ h1, h2, h3, h4, h5, h6 {{
 }}
 .header-univaja-conteudo {{ position: relative; z-index: 1; padding: 8px 0; }}
 .header-univaja-titulo {{
-    font-size: 26px; font-weight: 800; letter-spacing: 2px;
-    text-transform: uppercase;
+    font-family: 'Battambang', 'Archivo', serif;
+    font-size: 30px; font-weight: 700; letter-spacing: 3px;
+    line-height: 1;
+}}
+.header-univaja-app {{
+    font-size: 15px; font-weight: 700; margin-top: 10px;
+    letter-spacing: 1px; text-transform: uppercase;
+    background: rgba(255,255,255,.18); padding: 4px 12px;
+    border-radius: 12px; display: inline-block;
 }}
 .header-univaja-sub {{
     font-size: 13px; opacity: .92; margin-top: 4px; font-weight: 500;
@@ -204,6 +307,62 @@ h1, h2, h3, h4, h5, h6 {{
     font-size: 11px; opacity: .85; text-align: right;
     position: relative; z-index: 1; padding: 8px 0;
     text-transform: uppercase; letter-spacing: 1px;
+}}
+
+/* ═══ Kanban de fluxos ═════════════════════════════════════════════════════ */
+.flow-row {{
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin: 14px 0; align-items: stretch;
+}}
+.flow-step {{
+    flex: 1; min-width: 150px;
+    background: white;
+    border: 1.5px solid var(--cor-etapa, {VERDE});
+    border-radius: 12px;
+    padding: 12px 14px 14px;
+    position: relative;
+    display: flex; flex-direction: column;
+}}
+.flow-step::before {{
+    content: "";
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 6px;
+    background: var(--cor-etapa, {VERDE});
+    border-radius: 12px 12px 0 0;
+}}
+.flow-step-num {{
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px;
+    background: var(--cor-etapa, {VERDE});
+    color: white;
+    border-radius: 50%;
+    font-weight: 800; font-size: 13px;
+    margin-bottom: 8px; margin-top: 4px;
+}}
+.flow-step-titulo {{
+    font-size: 12px; font-weight: 700; color: {VERDE_PRETO};
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 6px; min-height: 28px;
+}}
+.flow-step-resp {{
+    font-size: 11px; color: {CINZA}; line-height: 1.4;
+    margin-bottom: 8px; flex: 1;
+}}
+.flow-step-entrega {{
+    background: {CREME};
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 10px;
+    color: {VERDE_PRETO};
+    border-left: 3px solid var(--cor-etapa, {VERDE});
+    line-height: 1.35;
+}}
+.flow-arrow {{
+    display: flex; align-items: center; justify-content: center;
+    color: var(--cor-etapa, {VERDE});
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 -2px;
 }}
 
 /* ═══ Divisores com grafismo Marubo ═══════════════════════════════════════ */
@@ -675,6 +834,26 @@ h1, h2, h3, h4, h5, h6 {{
 [data-testid="stSidebar"] .stCheckbox label {{ color: {CREME} !important; font-size: 13px; }}
 [data-testid="stSidebar"] hr {{ border-color: {VERDE_ESC}; }}
 
+/* Logo na sidebar */
+.sidebar-logo {{
+    display: flex; flex-direction: column; align-items: center;
+    padding: 18px 8px 14px;
+    border-radius: 12px;
+    background: rgba(220,54,55,.12);
+    margin-bottom: 14px;
+    border: 1px solid {VERDE_ESC};
+}}
+.sidebar-logo-nome {{
+    font-family: 'Battambang', 'Archivo', serif;
+    font-weight: 700; font-size: 22px;
+    color: white; letter-spacing: 3px; margin-top: 8px; line-height: 1;
+}}
+.sidebar-logo-sub {{
+    font-family: 'Archivo', sans-serif;
+    font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+    color: {VERDE_CLARO}; margin-top: 4px; opacity: .9; text-align: center;
+}}
+
 /* Inputs */
 .stTextInput input, .stTextArea textarea, .stSelectbox div[data-baseweb="select"] {{
     border-color: {VERDE_CLARO} !important;
@@ -691,12 +870,35 @@ h1, h2, h3, h4, h5, h6 {{
 
 
 def header(titulo: str, sub: str = "", meta: str = "Uso interno · 2026") -> str:
-    """Header padrão UNIVAJA com grafismos Marubo + pontos Kanamari."""
+    """Header padrão UNIVAJA com logo + grafismos Marubo + pontos Kanamari.
+
+    O parâmetro `titulo` vira o nome do APP (após a logo UNIVAJA),
+    para deixar claro qual ferramenta está em uso.
+    """
+    # Logo embutida em branco para contraste no header vermelho
+    logo_simbolo_branco = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" style="height:56px;width:56px;flex-shrink:0">
+        <circle cx="32" cy="32" r="30" fill="white"/>
+        <circle cx="32" cy="32" r="30" fill="none" stroke="{VERMELHO_ESC}" stroke-width="1.5"/>
+        <path d="M32 12 L52 38 L12 38 Z" fill="{PRIMARIA}"/>
+        <rect x="10" y="38" width="44" height="2.5" fill="{VERMELHO_ESC}"/>
+        <rect x="10" y="40.5" width="44" height="13" fill="{VERDE_PRETO}"/>
+        <path d="M14 50 L14 44 L18 44 L18 48 L22 48 L22 44 L26 44 L26 50
+                 M30 50 L30 44 L34 44 L34 48 L38 48 L38 44 L42 44 L42 50
+                 M46 50 L46 44 L50 44 L50 48"
+              stroke="white" stroke-width="1.3" fill="none" stroke-linecap="square"/>
+        <circle cx="32" cy="22" r="2.2" fill="{PRIMARIA}"/>
+    </svg>"""
+
     return f"""
 <div class="header-univaja">
-    <div class="header-univaja-conteudo">
-        <div class="header-univaja-titulo">🌿 {titulo}</div>
-        <div class="header-univaja-sub">{sub}</div>
+    <div class="header-univaja-conteudo" style="display:flex;align-items:center;gap:16px">
+        {logo_simbolo_branco}
+        <div>
+            <div class="header-univaja-titulo">UNIVAJA</div>
+            <div class="header-univaja-sub" style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;opacity:.85">União dos Povos do Vale do Javari</div>
+            <div class="header-univaja-app">{titulo}</div>
+            <div class="header-univaja-sub">{sub}</div>
+        </div>
     </div>
     <div class="header-univaja-meta">{meta}</div>
 </div>
@@ -716,3 +918,51 @@ def section_title(texto: str, variante: str = "padrao") -> str:
     elif variante == "verde":
         cls += " section-title-verde"
     return f'<div class="{cls}">◆ {texto}</div>'
+
+
+def sidebar_logo() -> str:
+    """Logo UNIVAJA estilizada para colocar no topo da sidebar."""
+    simbolo = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" style="height:64px;width:64px">
+        <circle cx="32" cy="32" r="30" fill="white"/>
+        <circle cx="32" cy="32" r="30" fill="none" stroke="{VERMELHO_ESC}" stroke-width="1.5"/>
+        <path d="M32 12 L52 38 L12 38 Z" fill="{PRIMARIA}"/>
+        <rect x="10" y="38" width="44" height="2.5" fill="{VERMELHO_ESC}"/>
+        <rect x="10" y="40.5" width="44" height="13" fill="{VERDE_PRETO}"/>
+        <path d="M14 50 L14 44 L18 44 L18 48 L22 48 L22 44 L26 44 L26 50
+                 M30 50 L30 44 L34 44 L34 48 L38 48 L38 44 L42 44 L42 50
+                 M46 50 L46 44 L50 44 L50 48"
+              stroke="white" stroke-width="1.3" fill="none" stroke-linecap="square"/>
+        <circle cx="32" cy="22" r="2.2" fill="{PRIMARIA}"/>
+    </svg>"""
+    return f"""<div class="sidebar-logo">
+        {simbolo}
+        <div class="sidebar-logo-nome">UNIVAJA</div>
+        <div class="sidebar-logo-sub">União dos Povos do<br>Vale do Javari</div>
+    </div>"""
+
+
+def flow_kanban(etapas: list) -> str:
+    """Renderiza um kanban horizontal de fluxo.
+
+    Cada item de `etapas` é um dict com:
+    - num: número/identificador da etapa (str)
+    - titulo: nome da etapa
+    - responsavel: quem faz
+    - entrega: o que entrega
+    - cor: cor da coluna (hex)
+    """
+    blocos = []
+    for i, e in enumerate(etapas):
+        cor = e.get("cor", VERDE)
+        blocos.append(f"""
+        <div class="flow-step" style="--cor-etapa:{cor}">
+            <div class="flow-step-num" style="background:{cor}">{e.get('num','')}</div>
+            <div class="flow-step-titulo">{e.get('titulo','')}</div>
+            <div class="flow-step-resp">👤 {e.get('responsavel','')}</div>
+            <div class="flow-step-entrega">📦 {e.get('entrega','')}</div>
+        </div>
+        """)
+        if i < len(etapas) - 1:
+            cor_next = etapas[i+1].get("cor", VERDE)
+            blocos.append(f'<div class="flow-arrow" style="--cor-etapa:{cor_next}">▶</div>')
+    return f'<div class="flow-row">{"".join(blocos)}</div>'

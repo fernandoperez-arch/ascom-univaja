@@ -13,7 +13,7 @@ import re
 import json
 
 from univaja_brand import (
-    css_global, header, divisor, section_title,
+    css_global, header, divisor, section_title, sidebar_logo,
     PRIMARIA, VERDE_PRETO, VERDE, CINZA,
 )
 
@@ -170,6 +170,7 @@ def identificar_tags(item):
 
 # ─── Sidebar ─────────────────────────────────────────────────────────────────
 with st.sidebar:
+    st.markdown(sidebar_logo(), unsafe_allow_html=True)
     st.markdown("### 🔍 Filtros")
 
     periodo_label = st.selectbox("Período",
