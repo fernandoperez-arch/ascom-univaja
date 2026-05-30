@@ -11,6 +11,8 @@ import uuid
 
 from univaja_brand import (
     css_global, header, divisor, section_title, flow_kanban, sidebar_logo,
+    logo_google_noticias, logo_google_trends, logo_google_search,
+    eh_pauta_sensivel,
     PRIMARIA, VERMELHO_ESC, VERMELHO_MED, VERMELHO_CLARO,
     VERDE, VERDE_ESC, VERDE_PRETO, VERDE_CLARO,
     CINZA, PRETO, BRANCO, CREME,
@@ -621,24 +623,36 @@ with aba_monitor:
     col_l1, col_l2 = st.columns(2)
     with col_l1:
         st.markdown(f"""
-        <a href="{url_gnoticias}" target="_blank" class="link-busca">
-            <div class="link-busca-titulo">📰 Google Notícias →</div>
-            <div class="link-busca-desc">Manchetes mais recentes com os termos selecionados.</div>
+        <a href="{url_gnoticias}" target="_blank" class="link-google">
+            <div class="link-google-conteudo">
+                <div class="link-google-titulo">{logo_google_noticias(22)}</div>
+                <div class="link-google-desc">Manchetes mais recentes com os termos selecionados</div>
+            </div>
+            <div class="link-google-seta">→</div>
         </a>
-        <a href="{url_gsearch}" target="_blank" class="link-busca">
-            <div class="link-busca-titulo">🔎 Google Search News (mais recentes) →</div>
-            <div class="link-busca-desc">Ordenado por data — as notícias mais novas primeiro.</div>
+        <a href="{url_gsearch}" target="_blank" class="link-google">
+            <div class="link-google-conteudo">
+                <div class="link-google-titulo">{logo_google_search(22)} <span style='color:#5f6368;font-weight:400;font-size:12px'>(notícias por data)</span></div>
+                <div class="link-google-desc">Ordenado pelas notícias mais novas primeiro</div>
+            </div>
+            <div class="link-google-seta">→</div>
         </a>
         """, unsafe_allow_html=True)
     with col_l2:
         st.markdown(f"""
-        <a href="{url_trends}" target="_blank" class="link-busca">
-            <div class="link-busca-titulo">📈 Google Trends — comparativo →</div>
-            <div class="link-busca-desc">Qual termo está em alta no Brasil.</div>
+        <a href="{url_trends}" target="_blank" class="link-google">
+            <div class="link-google-conteudo">
+                <div class="link-google-titulo">{logo_google_trends(22)} <span style='color:#5f6368;font-weight:400;font-size:12px'>— comparativo</span></div>
+                <div class="link-google-desc">Qual dos termos está mais em alta no Brasil</div>
+            </div>
+            <div class="link-google-seta">→</div>
         </a>
-        <a href="{url_trends_ex}" target="_blank" class="link-busca">
-            <div class="link-busca-titulo">🔬 Google Trends — explorar →</div>
-            <div class="link-busca-desc">Explora o primeiro termo em profundidade.</div>
+        <a href="{url_trends_ex}" target="_blank" class="link-google">
+            <div class="link-google-conteudo">
+                <div class="link-google-titulo">{logo_google_trends(22)} <span style='color:#5f6368;font-weight:400;font-size:12px'>— explorar</span></div>
+                <div class="link-google-desc">Explora o primeiro termo em profundidade</div>
+            </div>
+            <div class="link-google-seta">→</div>
         </a>
         """, unsafe_allow_html=True)
 
@@ -937,17 +951,36 @@ with aba_agenda:
                         except Exception:
                             data_fmt = p.get("data","")
                         redes_s = " · ".join(p.get("redes", [])[:2])
-                        st.markdown(f"""
-                        <div style="background:white;border:1px solid #e5e7eb;border-left:3px solid {cor_e};border-radius:6px;padding:10px 10px;margin-bottom:6px">
-                            <div style="font-weight:600;font-size:11px;color:{VERDE_PRETO};line-height:1.3;margin-bottom:4px">{p.get('titulo','')[:60]}</div>
-                            <div style="font-size:10px;color:{CINZA}">
-                                📅 {data_fmt}<br>
-                                👤 {p.get('responsavel','—')}<br>
-                                📡 {redes_s}<br>
-                                📝 {p.get('tipo','')}
+                        sensivel = eh_pauta_sensivel(p.get("titulo",""), p.get("briefing",""))
+
+                        if sensivel:
+                            st.markdown(f"""
+                            <div class="pauta-sensivel" style="padding:10px;margin-bottom:6px">
+                                <span class="alerta-sensivel-tag" style="font-size:9px;padding:3px 8px">TEMA SENSÍVEL</span>
+                                <div style="font-weight:700;font-size:11px;color:{VERMELHO_ESC};line-height:1.3;margin-bottom:4px">{p.get('titulo','')[:60]}</div>
+                                <div style="font-size:10px;color:{CINZA}">
+                                    📅 {data_fmt}<br>
+                                    👤 {p.get('responsavel','—')}<br>
+                                    📡 {redes_s}<br>
+                                    📝 {p.get('tipo','')}
+                                </div>
+                                <div class="alerta-sensivel-msg" style="font-size:9.5px;margin-top:6px">
+                                    🚨 Validar com Procuradoria + Coord.
+                                </div>
                             </div>
-                        </div>
-                        """, unsafe_allow_html=True)
+                            """, unsafe_allow_html=True)
+                        else:
+                            st.markdown(f"""
+                            <div style="background:white;border:1px solid #e5e7eb;border-left:3px solid {cor_e};border-radius:6px;padding:10px 10px;margin-bottom:6px">
+                                <div style="font-weight:600;font-size:11px;color:{VERDE_PRETO};line-height:1.3;margin-bottom:4px">{p.get('titulo','')[:60]}</div>
+                                <div style="font-size:10px;color:{CINZA}">
+                                    📅 {data_fmt}<br>
+                                    👤 {p.get('responsavel','—')}<br>
+                                    📡 {redes_s}<br>
+                                    📝 {p.get('tipo','')}
+                                </div>
+                            </div>
+                            """, unsafe_allow_html=True)
 
                         # Mover de etapa
                         nova_etapa = st.selectbox("→ mover",
@@ -1105,6 +1138,41 @@ def gerar_pdf_agenda(pautas, programacao, datas_proximas, titulo, observacoes):
             pdf.ln(1)
         pdf.ln(3)
 
+    # Identificar pautas sensíveis ANTES de listar
+    pautas_sens = [p for p in pautas
+                   if eh_pauta_sensivel(p.get("titulo",""), p.get("briefing",""))]
+
+    # ── BLOCO ATENÇÃO — Pautas sensíveis (destaque em vermelho) ────────────
+    if pautas_sens:
+        if pdf.get_y() > 200: pdf.add_page()
+
+        # Caixa de alerta vermelha
+        y0 = pdf.get_y()
+        pdf.set_fill_color(*hex_rgb(VERMELHO_FUNDO if False else "#FCE8E8"))
+        pdf.rect(10, y0, 190, 6 + 5 + 7*len(pautas_sens) + 8, "F")
+        # Borda esquerda forte
+        pdf.set_fill_color(*hex_rgb(VERMELHO_ESC))
+        pdf.rect(10, y0, 3, 6 + 5 + 7*len(pautas_sens) + 8, "F")
+
+        pdf.set_xy(16, y0 + 3)
+        pdf.set_text_color(*hex_rgb(VERMELHO_ESC))
+        pdf.set_font("helvetica", "B", 12)
+        pdf.cell(0, 6, latin(f"!! ATENCAO - {len(pautas_sens)} PAUTA(S) SENSIVEL(IS)"), ln=1)
+        pdf.set_x(16)
+        pdf.set_font("helvetica", "I", 9)
+        pdf.multi_cell(180, 4.5, latin("Pautas abaixo exigem validacao OBRIGATORIA da Coordenacao Geral + Procuradoria antes de publicar."))
+        pdf.ln(1)
+        pdf.set_font("helvetica", "", 9)
+        for ps in pautas_sens:
+            try:
+                dt_p = datetime.fromisoformat(ps["data"]).strftime("%d/%m")
+            except Exception:
+                dt_p = ps.get("data","")
+            pdf.set_x(16)
+            pdf.set_text_color(*hex_rgb(VERMELHO_ESC))
+            pdf.cell(0, 5, latin(f"  -> [{dt_p}] {ps.get('titulo','')}"), ln=1)
+        pdf.ln(4)
+
     # Pautas da agenda
     if pautas:
         pdf.set_text_color(*hex_rgb(VERDE_PRETO))
@@ -1132,23 +1200,54 @@ def gerar_pdf_agenda(pautas, programacao, datas_proximas, titulo, observacoes):
             pdf.ln(1)
 
             for p in lista:
-                if pdf.get_y() > 260: pdf.add_page()
-                pdf.set_text_color(*hex_rgb(VERDE_PRETO))
-                pdf.set_font("helvetica", "B", 11)
-                pdf.set_x(14)
-                pdf.multi_cell(0, 6, latin(f"- {p.get('titulo','')}"))
+                if pdf.get_y() > 255: pdf.add_page()
+                sens = eh_pauta_sensivel(p.get("titulo",""), p.get("briefing",""))
+
+                y_ini = pdf.get_y()
+
+                if sens:
+                    # Fundo vermelho claro + borda vermelha
+                    altura_est = 38 + (12 if p.get("briefing") else 0)
+                    pdf.set_fill_color(252, 232, 232)  # vermelho fundo
+                    pdf.rect(13, y_ini, 187, altura_est, "F")
+                    pdf.set_fill_color(*hex_rgb(VERMELHO_ESC))
+                    pdf.rect(13, y_ini, 3, altura_est, "F")
+
+                    # Tag vermelha "SENSIVEL"
+                    pdf.set_xy(18, y_ini + 2)
+                    pdf.set_fill_color(*hex_rgb(PRIMARIA))
+                    pdf.set_text_color(255, 255, 255)
+                    pdf.set_font("helvetica", "B", 8)
+                    pdf.cell(45, 4.5, latin(" !! TEMA SENSIVEL "), align="C", fill=True, ln=1)
+                    pdf.set_xy(18, y_ini + 8)
+
+                    pdf.set_text_color(*hex_rgb(VERMELHO_ESC))
+                    pdf.set_font("helvetica", "B", 11)
+                    pdf.multi_cell(180, 5.5, latin(f"- {p.get('titulo','')}"))
+                else:
+                    pdf.set_text_color(*hex_rgb(VERDE_PRETO))
+                    pdf.set_font("helvetica", "B", 11)
+                    pdf.set_x(14)
+                    pdf.multi_cell(0, 6, latin(f"- {p.get('titulo','')}"))
 
                 pdf.set_text_color(*hex_rgb(CINZA))
                 pdf.set_font("helvetica", "", 9)
-                pdf.set_x(14)
-                pdf.multi_cell(0, 4.5, latin(f"  Tipo: {p.get('tipo','')} | Redes: {', '.join(p.get('redes',[]))}"))
-                pdf.set_x(14)
-                pdf.multi_cell(0, 4.5, latin(f"  Responsavel: {p.get('responsavel','—')} | Etapa: {p.get('etapa','')}"))
+                pdf.set_x(18 if sens else 14)
+                pdf.multi_cell(180 if sens else 0, 4.5,
+                    latin(f"  Tipo: {p.get('tipo','')} | Redes: {', '.join(p.get('redes',[]))}"))
+                pdf.set_x(18 if sens else 14)
+                pdf.multi_cell(180 if sens else 0, 4.5,
+                    latin(f"  Responsavel: {p.get('responsavel','—')} | Etapa: {p.get('etapa','')}"))
                 if p.get("briefing"):
-                    pdf.set_x(14)
+                    pdf.set_x(18 if sens else 14)
                     pdf.set_font("helvetica", "I", 9)
-                    pdf.multi_cell(0, 4.5, latin(f"  Briefing: {p['briefing']}"))
-                pdf.ln(2)
+                    pdf.multi_cell(180 if sens else 0, 4.5, latin(f"  Briefing: {p['briefing']}"))
+                if sens:
+                    pdf.set_x(18)
+                    pdf.set_text_color(*hex_rgb(VERMELHO_ESC))
+                    pdf.set_font("helvetica", "B", 9)
+                    pdf.multi_cell(180, 4.5, latin("  >> Validar com Procuradoria + Coordenacao antes de publicar"))
+                pdf.ln(3)
 
     # Programação mensal
     if programacao.strip():
@@ -1172,33 +1271,87 @@ def gerar_pdf_agenda(pautas, programacao, datas_proximas, titulo, observacoes):
         pdf.multi_cell(0, 5, latin(observacoes))
         pdf.ln(3)
 
-    # Bloco de aprovação
+    # Divisor com greca Marubo (linha de quadrados)
+    if pdf.get_y() > 220: pdf.add_page()
+    pdf.set_fill_color(*hex_rgb(PRIMARIA))
+    bx = 10
+    while bx < 200:
+        pdf.rect(bx, pdf.get_y(), 3, 1.5, "F")
+        bx += 6
+    pdf.ln(5)
+
+    # Bloco de aprovação com header colorido
     if pdf.get_y() > 230: pdf.add_page()
-    pdf.set_fill_color(*hex_rgb(CREME))
-    pdf.set_text_color(*hex_rgb(VERDE_PRETO))
-    pdf.set_font("helvetica", "B", 12)
-    pdf.cell(0, 7, latin("APROVACAO DOS REPRESENTANTES"), ln=1, fill=True)
-    pdf.set_font("helvetica", "", 9)
-    pdf.set_text_color(*hex_rgb(CINZA))
-    pdf.multi_cell(0, 5, latin("Por favor, responder este email com APROVADO, AJUSTAR ou NAO PUBLICAR para cada bloco da agenda. Observacoes especificas podem ser anotadas por pauta."))
-    pdf.ln(4)
-    pdf.set_text_color(*hex_rgb(VERDE_PRETO))
-    pdf.set_font("helvetica", "", 10)
-    pdf.cell(0, 8, latin("[ ] APROVADO integralmente"), ln=1)
-    pdf.cell(0, 8, latin("[ ] APROVADO com ajustes (descrever abaixo)"), ln=1)
-    pdf.cell(0, 8, latin("[ ] REJEITADO / Solicito nova proposta"), ln=1)
+
+    # Cabeçalho do bloco em vermelho UNIVAJA
+    pdf.set_fill_color(*hex_rgb(PRIMARIA))
+    pdf.rect(10, pdf.get_y(), 190, 10, "F")
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("helvetica", "B", 13)
+    pdf.set_xy(14, pdf.get_y() + 2)
+    pdf.cell(0, 6, latin("APROVACAO DOS REPRESENTANTES UNIVAJA"), ln=1)
     pdf.ln(2)
+
+    # Caixa creme com instruções
+    y_bloco = pdf.get_y()
+    pdf.set_fill_color(*hex_rgb(CREME))
+    pdf.rect(10, y_bloco, 190, 60, "F")
+    pdf.set_fill_color(*hex_rgb(VERDE_PRETO))
+    pdf.rect(10, y_bloco, 3, 60, "F")
+
+    pdf.set_xy(16, y_bloco + 3)
+    pdf.set_font("helvetica", "I", 9)
+    pdf.set_text_color(*hex_rgb(CINZA))
+    pdf.multi_cell(180, 4.5, latin("Por favor, responder este email indicando APROVADO, AJUSTAR ou NAO PUBLICAR. Observacoes especificas podem ser anotadas por pauta."))
+    pdf.ln(3)
+
+    pdf.set_x(16)
+    pdf.set_text_color(*hex_rgb(VERDE_PRETO))
+    pdf.set_font("helvetica", "B", 11)
+    pdf.cell(0, 7, latin("[ ]  APROVADO integralmente"), ln=1)
+    pdf.set_x(16)
+    pdf.cell(0, 7, latin("[ ]  APROVADO com ajustes (descrever abaixo)"), ln=1)
+    pdf.set_x(16)
+    pdf.set_text_color(*hex_rgb(VERMELHO_ESC))
+    pdf.cell(0, 7, latin("[ ]  REJEITADO / Solicito nova proposta"), ln=1)
+
+    pdf.ln(3)
+    pdf.set_x(16)
+    pdf.set_text_color(*hex_rgb(CINZA))
     pdf.set_font("helvetica", "I", 9)
     pdf.cell(0, 5, latin("Observacoes do representante:"), ln=1)
     pdf.set_draw_color(*hex_rgb(CINZA))
-    for _ in range(4):
-        pdf.cell(0, 7, "", ln=1, border="B")
+    for _ in range(3):
+        pdf.set_x(16)
+        pdf.cell(180, 7, "", ln=1, border="B")
 
-    # Rodapé
-    pdf.set_y(-20)
-    pdf.set_text_color(*hex_rgb(CINZA))
-    pdf.set_font("helvetica", "I", 8)
-    pdf.cell(0, 4, latin("ASCOM UNIVAJA - 2026 - documento de uso interno"), align="C", ln=1)
+    pdf.ln(4)
+    # Pontos Kanamari decorativos
+    pdf.set_fill_color(*hex_rgb(PRIMARIA))
+    bx = 10
+    while bx < 200:
+        pdf.ellipse(bx, pdf.get_y(), 1.2, 1.2, "F")
+        pdf.ellipse(bx+6, pdf.get_y(), 1.2, 1.2, "F")
+        bx += 12
+
+    # Rodapé com logo mini
+    pdf.set_y(-18)
+    pdf.set_fill_color(*hex_rgb(PRIMARIA))
+    pdf.rect(0, pdf.get_y(), 210, 18, "F")
+    # Maloca mini no rodapé
+    pdf.set_fill_color(255, 255, 255)
+    pdf.rect(8, pdf.get_y() + 6, 1.5, 1.5, "F")
+    pdf.rect(7, pdf.get_y() + 7.5, 3.5, 1.5, "F")
+    pdf.rect(6, pdf.get_y() + 9, 5.5, 1.5, "F")
+    pdf.rect(5, pdf.get_y() + 10.5, 7.5, 2, "F")
+
+    pdf.set_xy(16, pdf.get_y() + 5)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("helvetica", "B", 9)
+    pdf.cell(0, 4, latin("UNIVAJA - Uniao dos Povos do Vale do Javari"), ln=1)
+    pdf.set_x(16)
+    pdf.set_font("helvetica", "I", 7)
+    pdf.cell(0, 3.5, latin("ASCOM 2026 - documento de uso interno"), ln=1)
 
     result = pdf.output(dest="S")
     if isinstance(result, str):

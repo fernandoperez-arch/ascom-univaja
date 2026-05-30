@@ -708,6 +708,91 @@ h4, h5, h6 {{
 .cal-pauta {{ font-size: 13px; color: {CINZA}; line-height: 1.5; margin-top: 4px; }}
 .cal-resp  {{ font-size: 11px; color: #6b7280; margin-top: 4px; }}
 
+/* ═══ Pautas sensíveis ════════════════════════════════════════════════════ */
+.pauta-sensivel {{
+    background: linear-gradient(90deg, {VERMELHO_FUNDO} 0%, white 35%);
+    border: 2px solid {PRIMARIA};
+    border-left: 8px solid {VERMELHO_ESC};
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(220,54,55,.15);
+}}
+.pauta-sensivel::before {{
+    content: "";
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle at top right, {PRIMARIA}22 0%, transparent 70%);
+    pointer-events: none;
+}}
+.alerta-sensivel-tag {{
+    display: inline-flex; align-items: center; gap: 6px;
+    background: {PRIMARIA};
+    color: white;
+    padding: 5px 12px;
+    border-radius: 14px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 6px rgba(120,11,11,.3);
+}}
+.alerta-sensivel-tag::before {{
+    content: "⚠️";
+    font-size: 14px;
+}}
+.alerta-sensivel-msg {{
+    background: white;
+    border-left: 4px solid {PRIMARIA};
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    color: {VERMELHO_ESC};
+    margin-top: 8px;
+    line-height: 1.4;
+    font-weight: 500;
+}}
+
+/* Link Google estilizado */
+.link-google {{
+    display: flex; align-items: center; gap: 14px;
+    background: white;
+    border: 1px solid #dadce0;
+    border-radius: 24px;
+    padding: 14px 20px;
+    text-decoration: none;
+    color: #202124;
+    margin-bottom: 10px;
+    transition: all .15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}}
+.link-google:hover {{
+    box-shadow: 0 4px 14px rgba(0,0,0,.10);
+    border-color: #4285F4;
+    transform: translateY(-1px);
+}}
+.link-google-conteudo {{ flex: 1; }}
+.link-google-titulo {{
+    font-family: 'Archivo', sans-serif;
+    font-weight: 600; font-size: 15px;
+    color: #202124;
+    margin-bottom: 2px;
+    display: flex; align-items: center; gap: 8px;
+}}
+.link-google-desc {{
+    font-size: 12px; color: #5f6368;
+    line-height: 1.4;
+}}
+.link-google-seta {{
+    color: #4285F4;
+    font-size: 18px;
+    font-weight: 700;
+}}
+
 /* ═══ News card (Monitor) ════════════════════════════════════════════════ */
 .news-card {{
     background: white;
@@ -918,6 +1003,63 @@ def section_title(texto: str, variante: str = "padrao") -> str:
     elif variante == "verde":
         cls += " section-title-verde"
     return f'<div class="{cls}">◆ {texto}</div>'
+
+
+# ─── LOGOS GOOGLE (para links de busca) ───────────────────────────────────────
+def logo_google(tamanho: int = 22) -> str:
+    """G colorido oficial do Google."""
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" style="height:{tamanho}px;width:{tamanho}px;display:inline-block;vertical-align:middle;flex-shrink:0">
+<path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/>
+<path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/>
+<path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"/>
+<path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/>
+</svg>"""
+
+
+def logo_google_noticias(tamanho: int = 22) -> str:
+    """G colorido + ícone de jornal pequeno."""
+    g = logo_google(tamanho)
+    return f'<span style="display:inline-flex;align-items:center;gap:6px;vertical-align:middle">{g}<span style="font-family:Archivo,sans-serif;font-size:14px;font-weight:500;color:#5f6368">Notícias</span></span>'
+
+
+def logo_google_trends(tamanho: int = 22) -> str:
+    """G colorido + ícone de tendência ascendente."""
+    g = logo_google(tamanho)
+    return f'<span style="display:inline-flex;align-items:center;gap:6px;vertical-align:middle">{g}<span style="font-family:Archivo,sans-serif;font-size:14px;font-weight:500;color:#5f6368">Trends</span></span>'
+
+
+def logo_google_search(tamanho: int = 22) -> str:
+    g = logo_google(tamanho)
+    return f'<span style="display:inline-flex;align-items:center;gap:6px;vertical-align:middle">{g}<span style="font-family:Archivo,sans-serif;font-size:14px;font-weight:500;color:#5f6368">Search</span></span>'
+
+
+# ─── DETECÇÃO DE PAUTAS SENSÍVEIS ─────────────────────────────────────────────
+PALAVRAS_SENSIVEIS = [
+    "denúncia", "denuncia", "denunciar",
+    "violência", "violencia", "violento",
+    "assassinato", "assassinar", "morte", "morto",
+    "garimpo", "garimpeiro",
+    "invasão", "invasao", "invasor", "invadir",
+    "ameaça", "ameaca", "ameaçar",
+    "perseguição", "perseguicao",
+    "ataque", "atacar",
+    "racismo", "racista",
+    "marco temporal",
+    "crise", "polêmica", "polemica",
+    "bruno pereira", "dom phillips", "bruno e dom",
+    "stf", "supremo",
+    "pec ", "projeto de lei",
+    "madeireira", "madeireiro",
+    "narcotráfico", "narcotrafico", "tráfico",
+    "conflito",
+]
+
+def eh_pauta_sensivel(*textos) -> bool:
+    """Detecta se uma pauta toca tema sensível pela presença de palavras-chave."""
+    txt = " ".join([str(t) for t in textos if t]).lower()
+    if "🔴" in txt or "urgente" in txt:
+        return True
+    return any(p in txt for p in PALAVRAS_SENSIVEIS)
 
 
 def sidebar_logo() -> str:

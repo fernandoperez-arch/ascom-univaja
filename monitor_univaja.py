@@ -14,6 +14,7 @@ import json
 
 from univaja_brand import (
     css_global, header, divisor, section_title, sidebar_logo,
+    logo_google_noticias, logo_google_trends, logo_google_search,
     PRIMARIA, VERDE_PRETO, VERDE, CINZA,
 )
 
@@ -441,24 +442,36 @@ with aba_t:
     col_a, col_b = st.columns(2)
     with col_a:
         st.markdown(f"""
-        <a href="{url_compare}" target="_blank" class="link-busca">
-            <div class="link-busca-titulo">📊 Comparativo entre termos →</div>
-            <div class="link-busca-desc">Veja qual dos termos selecionados teve mais buscas no Brasil no período.</div>
+        <a href="{url_compare}" target="_blank" class="link-google">
+            <div class="link-google-conteudo">
+                <div class="link-google-titulo">{logo_google_trends(22)} <span style='color:#5f6368;font-weight:400;font-size:12px'>— comparativo</span></div>
+                <div class="link-google-desc">Veja qual dos termos teve mais buscas no Brasil no período</div>
+            </div>
+            <div class="link-google-seta">→</div>
         </a>
-        <a href="{url_explore}" target="_blank" class="link-busca">
-            <div class="link-busca-titulo">🔬 Explorar "{termos_trends[0]}" →</div>
-            <div class="link-busca-desc">Análise profunda do primeiro termo: regiões, buscas relacionadas e evolução.</div>
+        <a href="{url_explore}" target="_blank" class="link-google">
+            <div class="link-google-conteudo">
+                <div class="link-google-titulo">{logo_google_trends(22)} <span style='color:#5f6368;font-weight:400;font-size:12px'>— explorar "{termos_trends[0][:30]}"</span></div>
+                <div class="link-google-desc">Análise profunda: regiões, buscas relacionadas e evolução</div>
+            </div>
+            <div class="link-google-seta">→</div>
         </a>
         """, unsafe_allow_html=True)
     with col_b:
         st.markdown(f"""
-        <a href="{url_diaria}" target="_blank" class="link-busca">
-            <div class="link-busca-titulo">🔥 Tendências do dia (Brasil) →</div>
-            <div class="link-busca-desc">Top buscas do dia no Brasil. Útil para identificar oportunidades de pauta.</div>
+        <a href="{url_diaria}" target="_blank" class="link-google">
+            <div class="link-google-conteudo">
+                <div class="link-google-titulo">{logo_google_trends(22)} <span style='color:#5f6368;font-weight:400;font-size:12px'>— tendências do dia 🔥</span></div>
+                <div class="link-google-desc">Top buscas do dia no Brasil — oportunidades de pauta</div>
+            </div>
+            <div class="link-google-seta">→</div>
         </a>
-        <a href="{url_realtime}" target="_blank" class="link-busca">
-            <div class="link-busca-titulo">⚡ Em tempo real (Brasil) →</div>
-            <div class="link-busca-desc">Histórias em ascensão agora — bom para reações rápidas a fatos recentes.</div>
+        <a href="{url_realtime}" target="_blank" class="link-google">
+            <div class="link-google-conteudo">
+                <div class="link-google-titulo">{logo_google_trends(22)} <span style='color:#5f6368;font-weight:400;font-size:12px'>— tempo real ⚡</span></div>
+                <div class="link-google-desc">Histórias em ascensão agora — reações rápidas</div>
+            </div>
+            <div class="link-google-seta">→</div>
         </a>
         """, unsafe_allow_html=True)
 
@@ -475,16 +488,22 @@ with aba_t:
     col_c, col_d = st.columns(2)
     with col_c:
         st.markdown(f"""
-        <a href="{url_gnews}" target="_blank" class="link-busca">
-            <div class="link-busca-titulo">📰 Google Notícias →</div>
-            <div class="link-busca-desc">Manchetes recentes com os termos selecionados.</div>
+        <a href="{url_gnews}" target="_blank" class="link-google">
+            <div class="link-google-conteudo">
+                <div class="link-google-titulo">{logo_google_noticias(22)}</div>
+                <div class="link-google-desc">Manchetes recentes com os termos selecionados</div>
+            </div>
+            <div class="link-google-seta">→</div>
         </a>
         """, unsafe_allow_html=True)
     with col_d:
         st.markdown(f"""
-        <a href="{url_gsearch}" target="_blank" class="link-busca">
-            <div class="link-busca-titulo">🔎 Google Search News →</div>
-            <div class="link-busca-desc">Busca filtrada por período. Complementa o Google Notícias.</div>
+        <a href="{url_gsearch}" target="_blank" class="link-google">
+            <div class="link-google-conteudo">
+                <div class="link-google-titulo">{logo_google_search(22)} <span style='color:#5f6368;font-weight:400;font-size:12px'>(notícias)</span></div>
+                <div class="link-google-desc">Busca filtrada por período — ordenada por data</div>
+            </div>
+            <div class="link-google-seta">→</div>
         </a>
         """, unsafe_allow_html=True)
 
