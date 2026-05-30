@@ -622,9 +622,9 @@ with aba4:
 
     st.markdown("""
     <div class="alerta alerta-azul">
-        💡 <strong>Versão completa:</strong> esta plataforma faz a busca via Google. Para um monitor robusto
-        com coleta automática de notícias por RSS (12+ fontes), use o app
-        <strong>Monitor UNIVAJA</strong> separado (<code>monitor_univaja.py</code>).
+        💡 <strong>Plataformas complementares:</strong><br>
+        • <strong>Monitor UNIVAJA</strong> (<code>monitor_univaja.py</code>) — coleta automática de notícias via RSS de 12+ fontes.<br>
+        • <strong>Planner UNIVAJA</strong> (<code>planner_univaja.py</code>) — planejamento de pautas, cronograma editorial e relatório PDF para a reunião.
     </div>
     """, unsafe_allow_html=True)
 
