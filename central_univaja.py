@@ -20,6 +20,7 @@ from univaja_brand import (
 )
 from core import auth, data
 from core import workflow as wf
+from core import datas_importantes as di
 from core.calendar_link import link_google_agenda
 
 # ─── Config ───────────────────────────────────────────────────────────────────
@@ -83,6 +84,21 @@ with st.sidebar:
             except Exception as ex:
                 st.error(f"Erro: {ex}")
 
+    st.markdown("---")
+    st.markdown("##### 📅 Calendário de datas")
+    st.caption("Datas comemorativas dos povos e da UNIVAJA, já com sugestão de post.")
+    ano_seed = st.number_input("Ano", min_value=2024, max_value=2035,
+                               value=date.today().year, step=1, key="ano_seed")
+    if st.button("📌 Carregar datas UNIVAJA na agenda", use_container_width=True):
+        novas = di.como_pautas(int(ano_seed))
+        existentes = {(p["titulo"], p["data"]) for p in data.listar()}
+        add = 0
+        for p in novas:
+            if (p["titulo"], p["data"]) not in existentes:
+                data.salvar(p); add += 1
+        st.success(f"✅ {add} data(s) adicionada(s) como pauta!")
+        st.rerun()
+
     if not data.listar():
         if st.button("✨ Carregar exemplos", use_container_width=True):
             data.carregar_exemplos()
@@ -136,6 +152,26 @@ def linha_pauta(p, contexto=""):
 # ══════════════════════════════════════════════════════════════════════════════
 if pagina == "📊 Dashboard":
     st.markdown(section_title("Dashboard editorial", "padrao"), unsafe_allow_html=True)
+
+    # ── Datas comemorativas UNIVAJA nos próximos 60 dias (sempre visível) ──
+    prox_datas = di.proximas(dias=60)
+    if prox_datas:
+        st.markdown("##### 📅 Datas comemorativas chegando (calendário UNIVAJA)")
+        chips = []
+        for dias_r, dt, e in prox_datas[:6]:
+            cor = PRIMARIA if e["sensivel"] else VERDE
+            quando = "hoje" if dias_r == 0 else (f"em {dias_r}d")
+            alerta = " ⚠️" if e["sensivel"] else ""
+            chips.append(
+                f"<div style='display:inline-block;background:white;border:1px solid {cor};"
+                f"border-left:4px solid {cor};border-radius:8px;padding:6px 12px;margin:0 6px 6px 0'>"
+                f"<span style='font-weight:700;color:{cor};font-size:12px'>{dt.strftime('%d/%m')}</span> "
+                f"<span style='font-size:12px;color:{VERDE_PRETO}'>{e['titulo'][:42]}{alerta}</span> "
+                f"<span style='font-size:10px;color:{CINZA}'>· {quando}</span></div>"
+            )
+        st.markdown("".join(chips), unsafe_allow_html=True)
+        st.caption("Use **📌 Carregar datas UNIVAJA** na barra lateral para virar pauta com 1 clique.")
+        st.markdown(divisor("pontos"), unsafe_allow_html=True)
 
     pautas = data.listar()
     if not pautas:
