@@ -41,14 +41,42 @@ preservados via **backup JSON** (botões na barra lateral: baixar / restaurar).
 3. Implemente os 4 hooks marcados `[SUPABASE-HOOK]` em `core/data.py`.
    O resto do app não muda.
 
-## Google Agenda
-Cada pauta tem botão **📅 Google Agenda** que abre o Google Calendar com o
-evento pré-preenchido. Os lembretes de **15 e 7 dias** vão como instrução na
-descrição (o link-template do Google não aceita lembrete custom).
+## Google Agenda — lembretes automáticos de 15 e 7 dias
+Há dois modos:
 
-Para lembretes **automáticos** de 15/7 dias é preciso a Calendar API com
-Service Account (evento com `reminders.useDefault=false` e `overrides` de
-21600 e 10080 minutos). Hook futuro: `core/calendar_api.py`.
+**A) Modo simples (sem configurar nada)** — botão `📅 Google Agenda` por pauta,
+que abre o Calendar já preenchido. Lembretes 15/7 dias ficam escritos na descrição.
+
+**B) Modo automático (recomendado)** — via Calendar API, cria/atualiza o evento na
+agenda da `imprensa@univaja.org` com lembretes por **e-mail + popup a 15 dias
+(21.600 min) e 7 dias (10.080 min)**. Botões `📆 Agendar (15/7d)` e
+`📆 Sincronizar agendadas`.
+
+### Configurar o modo automático (uma vez)
+1. **console.cloud.google.com** → crie um projeto (ex: `univaja-agenda`).
+2. **APIs e Serviços** → ative a **Google Calendar API**.
+3. **Credenciais → Criar → Conta de serviço** → gere e baixe a chave **JSON**.
+4. Abra o **Google Agenda da imprensa@univaja.org** → *Configurações da agenda* →
+   *Compartilhar com pessoas específicas* → adicione o **e-mail da conta de serviço**
+   (`...@....iam.gserviceaccount.com`) com permissão **"Fazer alterações nos eventos"**.
+5. No app: **⋮ → Settings → Secrets**, cole:
+   ```toml
+   [gcp_service_account]
+   type = "service_account"
+   project_id = "..."
+   private_key_id = "..."
+   private_key = "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+   client_email = "...@....iam.gserviceaccount.com"
+   client_id = "..."
+   token_uri = "https://oauth2.googleapis.com/token"
+
+   [gcal]
+   calendar_id = "imprensa@univaja.org"
+   ```
+Pronto — a sidebar passa a mostrar "✅ Conectada" e os botões de sincronizar aparecem.
+
+> O e-mail de lembrete chega para o **dono da agenda** (imprensa@univaja.org).
+> A Google Agenda é **espelho** da pauta — a base principal é a Central.
 
 ## Estrutura
 ```

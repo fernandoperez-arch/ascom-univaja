@@ -21,6 +21,7 @@ from univaja_brand import (
 from core import auth, data
 from core import workflow as wf
 from core import datas_importantes as di
+from core import calendar_api as gcal
 from core.calendar_link import link_google_agenda
 
 # ─── Config ───────────────────────────────────────────────────────────────────
@@ -83,6 +84,22 @@ with st.sidebar:
                 st.rerun()
             except Exception as ex:
                 st.error(f"Erro: {ex}")
+
+    st.markdown("---")
+    st.markdown("##### 📆 Google Agenda")
+    if gcal.esta_configurado():
+        st.caption("✅ Conectada. Os eventos saem com lembretes de 15 e 7 dias.")
+    else:
+        st.caption("⚠️ Não configurada — usando o botão de link simples.")
+        with st.expander("🔧 Como ativar lembretes 15/7 dias"):
+            st.markdown(
+                "1. Google Cloud → ative a **Calendar API** e crie uma **conta de serviço**.\n"
+                "2. Compartilhe a agenda da `imprensa@univaja.org` com o e-mail da conta de "
+                "serviço (permissão **fazer alterações**).\n"
+                "3. Cole o JSON em **Settings → Secrets** como `[gcp_service_account]` "
+                "e `[gcal] calendar_id`.\n\n"
+                "Detalhes no `README_CENTRAL.md`."
+            )
 
     st.markdown("---")
     st.markdown("##### 📅 Calendário de datas")
@@ -356,6 +373,22 @@ elif pagina == "➕ Cadastro de pauta":
 elif pagina == "🗓️ Calendário editorial":
     st.markdown(section_title("Calendário editorial", "padrao"), unsafe_allow_html=True)
 
+    if gcal.esta_configurado():
+        agendadas = [p for p in data.listar() if "Agendado" in p.get("status", "")]
+        pendentes = [p for p in agendadas if not p.get("gcal_event_id")]
+        ccol1, ccol2 = st.columns([3, 1])
+        ccol1.caption(f"📆 Google Agenda conectada · {len(agendadas)} agendada(s), "
+                      f"{len(pendentes)} ainda não sincronizada(s).")
+        if pendentes and ccol2.button("📆 Sincronizar agendadas", use_container_width=True,
+                                      help="Cria os eventos com lembretes de 15 e 7 dias"):
+            ok = 0
+            for p in pendentes:
+                r = gcal.sincronizar(p)
+                if r["ok"]:
+                    p["gcal_event_id"] = r["event_id"]; data.salvar(p); ok += 1
+            st.success(f"✅ {ok} evento(s) criado(s) com lembretes 15/7 dias!")
+            st.rerun()
+
     # Filtros via form (sem reruns a cada clique)
     with st.expander("🔍 Filtros", expanded=True):
         with st.form("form_filtros"):
@@ -446,20 +479,43 @@ elif pagina == "🗓️ Calendário editorial":
         pautas_ord = sorted(pautas, key=lambda x: (x.get("data",""), x.get("hora","")))
         st.caption(f"{len(pautas_ord)} pauta(s)")
         for p in pautas_ord:
+            sincronizada = bool(p.get("gcal_event_id"))
             st.markdown(linha_pauta(p), unsafe_allow_html=True)
-            cols = st.columns([1.2, 0.8, 2.5, 3.5])
+            cols = st.columns([1.1, 0.7, 2.2, 2.6, 1.4])
             if cols[0].button("✏️ Editar", key=f"ed_{p['id']}"):
                 st.session_state.editar_id = p["id"]
                 st.session_state["_pending_nav"] = "➕ Cadastro de pauta"
                 st.rerun()
             if cols[1].button("🗑️", key=f"rm_{p['id']}", help="Remover"):
+                if sincronizada:
+                    gcal.remover(p)
                 data.remover(p["id"]); st.rerun()
-            url_ag = link_google_agenda(p)
-            cols[2].markdown(
-                f'<a href="{url_ag}" target="_blank" style="display:inline-block;background:white;'
-                f'border:1px solid {VERDE_CLARO};color:{VERDE_PRETO};padding:5px 10px;border-radius:8px;'
-                f'text-decoration:none;font-size:12px;font-weight:600">📅 Google Agenda</a>',
-                unsafe_allow_html=True)
+
+            if gcal.esta_configurado():
+                # Sincronização real com lembretes 15/7 dias
+                label = "🔄 Resincronizar" if sincronizada else "📆 Agendar (15/7d)"
+                if cols[2].button(label, key=f"sync_{p['id']}",
+                                  help="Cria/atualiza o evento na Google Agenda com lembretes de 15 e 7 dias"):
+                    r = gcal.sincronizar(p)
+                    if r["ok"]:
+                        p["gcal_event_id"] = r["event_id"]
+                        data.salvar(p)
+                        st.success("✅ Sincronizado com lembretes 15/7 dias!")
+                        st.rerun()
+                    else:
+                        st.error(f"Erro: {r['erro']}")
+                if sincronizada:
+                    cols[3].markdown(
+                        f"<span style='font-size:11px;color:{VERDE};font-weight:600'>✓ na Google Agenda</span>",
+                        unsafe_allow_html=True)
+            else:
+                # Fallback: link simples (sem credenciais)
+                url_ag = link_google_agenda(p)
+                cols[2].markdown(
+                    f'<a href="{url_ag}" target="_blank" style="display:inline-block;background:white;'
+                    f'border:1px solid {VERDE_CLARO};color:{VERDE_PRETO};padding:5px 10px;border-radius:8px;'
+                    f'text-decoration:none;font-size:12px;font-weight:600">📅 Google Agenda</a>',
+                    unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
