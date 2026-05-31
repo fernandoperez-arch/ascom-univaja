@@ -116,124 +116,80 @@ def grafismo_mayuruna_chedebo(cor=PRIMARIA, altura=24):
 
 
 # ─── LOGO UNIVAJA — SELO OFICIAL ──────────────────────────────────────────────
-def logo_univaja_selo(tamanho: int = 120, cor: str = None) -> str:
+def logo_univaja_selo(tamanho: int = 120, cor: str = None, miolo: str = None) -> str:
     """
-    Selo oficial UNIVAJA fiel ao manual de marca:
-    - Círculo externo com texto curvado 'UNIÃO DOS POVOS INDÍGENAS / VALE DO JAVARI'
-    - Anel com greca Marubo
-    - Maloca triangular central
-    - Palmeiras laterais
-    - Jacamim (ave-símbolo) em destaque
-    - Faixa 'UNIVAJA' embaixo
+    Emblema UNIVAJA — selo circular 100% gráfico (sem texto, para não vazar
+    no sanitizador do Streamlit). O nome é renderizado como HTML ao lado.
+
+    - Anéis externos + grafismos (Marubo, Kanamari, Matis)
+    - Maloca triangular preenchida (cor primária)
+    - Jacamim + palmeiras em negativo (cor do miolo)
     """
     c = cor or PRIMARIA
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" style="height:{tamanho}px;width:{tamanho}px;flex-shrink:0">
-  <defs>
-    <path id="t-cima-{tamanho}" d="M 60 200 A 140 140 0 0 1 340 200" fill="none"/>
-    <path id="t-baixo-{tamanho}" d="M 70 230 A 130 130 0 0 0 330 230" fill="none"/>
-  </defs>
-
-  <!-- Anéis principais -->
-  <circle cx="200" cy="200" r="195" fill="none" stroke="{c}" stroke-width="3"/>
-  <circle cx="200" cy="200" r="158" fill="none" stroke="{c}" stroke-width="1.5"/>
+    m = miolo or "white"  # cor do fundo do miolo (negativo da maloca)
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" style="height:{tamanho}px;width:{tamanho}px;flex-shrink:0;display:block">
+  <circle cx="200" cy="200" r="195" fill="none" stroke="{c}" stroke-width="4"/>
+  <circle cx="200" cy="200" r="158" fill="none" stroke="{c}" stroke-width="2"/>
   <circle cx="200" cy="200" r="152" fill="none" stroke="{c}" stroke-width="1"/>
 
-  <!-- Anel decorativo: greca Marubo na borda inferior -->
-  <g stroke="{c}" stroke-width="2" fill="none" stroke-linecap="square">
-    <!-- meander base -->
-    <path d="M 110 365 L 110 357 L 124 357 L 124 369 L 138 369 L 138 357 L 152 357 L 152 365
-             M 166 365 L 166 357 L 180 357 L 180 369 L 194 369 L 194 357 L 208 357 L 208 365
-             M 222 365 L 222 357 L 236 357 L 236 369 L 250 369 L 250 357 L 264 357 L 264 365
-             M 278 365 L 278 357 L 292 357 L 292 369 L 300 369"/>
+  <g stroke="{c}" stroke-width="2.5" fill="none" stroke-linecap="square">
+    <path d="M 110 366 L 110 357 L 124 357 L 124 370 L 138 370 L 138 357 L 152 357 L 152 366
+             M 166 366 L 166 357 L 180 357 L 180 370 L 194 370 L 194 357 L 208 357 L 208 366
+             M 222 366 L 222 357 L 236 357 L 236 370 L 250 370 L 250 357 L 264 357 L 264 366
+             M 278 366 L 278 357 L 292 357 L 292 370 L 300 370"/>
   </g>
-
-  <!-- Topo: chevrons Kanamari -->
-  <g stroke="{c}" stroke-width="2.2" fill="none">
-    <path d="M 100 30 L 108 22 L 116 30 L 124 22 L 132 30 L 140 22 L 148 30 L 156 22 L 164 30
-             L 172 22 L 180 30 L 188 22 L 196 30 L 204 22 L 212 30 L 220 22 L 228 30
-             L 236 22 L 244 30 L 252 22 L 260 30 L 268 22 L 276 30 L 284 22 L 292 30 L 300 22"/>
+  <g stroke="{c}" stroke-width="2.5" fill="none">
+    <path d="M 104 32 L 112 23 L 120 32 L 128 23 L 136 32 L 144 23 L 152 32 L 160 23 L 168 32
+             L 176 23 L 184 32 L 192 23 L 200 32 L 208 23 L 216 32 L 224 23 L 232 32
+             L 240 23 L 248 32 L 256 23 L 264 32 L 272 23 L 280 32 L 288 23 L 296 32"/>
   </g>
-
-  <!-- Lateral direita: hatching (triângulos Matis) -->
-  <g stroke="{c}" stroke-width="1.5" fill="none">
-    <path d="M 365 110 L 380 110 M 365 118 L 380 118 M 365 126 L 380 126
-             M 365 134 L 380 134 M 365 142 L 380 142 M 365 150 L 380 150
-             M 365 158 L 380 158 M 365 166 L 380 166 M 365 174 L 380 174
-             M 365 182 L 380 182 M 365 190 L 380 190 M 365 198 L 380 198
-             M 365 206 L 380 206 M 365 214 L 380 214 M 365 222 L 380 222
-             M 365 230 L 380 230 M 365 238 L 380 238 M 365 246 L 380 246
-             M 365 254 L 380 254 M 365 262 L 380 262 M 365 270 L 380 270
-             M 365 278 L 380 278 M 365 286 L 380 286"/>
+  <g stroke="{c}" stroke-width="2" fill="none">
+    <path d="M 366 120 L 382 120 M 366 130 L 382 130 M 366 140 L 382 140
+             M 366 150 L 382 150 M 366 160 L 382 160 M 366 170 L 382 170
+             M 366 180 L 382 180 M 366 190 L 382 190 M 366 200 L 382 200
+             M 366 210 L 382 210 M 366 220 L 382 220 M 366 230 L 382 230
+             M 366 240 L 382 240 M 366 250 L 382 250 M 366 260 L 382 260
+             M 366 270 L 382 270 M 366 280 L 382 280"/>
   </g>
-
-  <!-- Lateral esquerda: triângulos invertidos -->
   <g fill="{c}">
-    <polygon points="20,110 30,120 20,130"/>
-    <polygon points="20,140 30,150 20,160"/>
-    <polygon points="20,170 30,180 20,190"/>
-    <polygon points="20,200 30,210 20,220"/>
-    <polygon points="20,230 30,240 20,250"/>
-    <polygon points="20,260 30,270 20,280"/>
+    <polygon points="18,120 30,132 18,144"/>
+    <polygon points="18,154 30,166 18,178"/>
+    <polygon points="18,188 30,200 18,212"/>
+    <polygon points="18,222 30,234 18,246"/>
+    <polygon points="18,256 30,268 18,280"/>
+  </g>
+  <circle cx="48" cy="200" r="4" fill="{c}"/>
+  <circle cx="352" cy="200" r="4" fill="{c}"/>
+
+  <!-- Maloca (triângulo + base semicircular) preenchida -->
+  <path d="M 200 88 L 292 218 L 108 218 Z" fill="{c}"/>
+  <path d="M 108 218 L 292 218 A 92 50 0 0 1 108 218 Z" fill="{c}"/>
+  <ellipse cx="200" cy="218" rx="92" ry="50" fill="{c}"/>
+
+  <!-- Palmeiras em negativo (miolo) -->
+  <g fill="{m}" stroke="{m}" stroke-width="2">
+    <line x1="150" y1="150" x2="150" y2="205"/>
+    <path d="M 150 152 Q 132 142 122 146" fill="none"/>
+    <path d="M 150 156 Q 130 154 120 160" fill="none"/>
+    <path d="M 150 152 Q 168 142 178 146" fill="none"/>
+    <path d="M 150 156 Q 170 154 180 160" fill="none"/>
+    <line x1="250" y1="150" x2="250" y2="205"/>
+    <path d="M 250 152 Q 268 142 278 146" fill="none"/>
+    <path d="M 250 156 Q 270 154 280 160" fill="none"/>
+    <path d="M 250 152 Q 232 142 222 146" fill="none"/>
+    <path d="M 250 156 Q 230 154 220 160" fill="none"/>
   </g>
 
-  <!-- Pontos separadores laterais (entre texto cima/baixo) -->
-  <circle cx="50" cy="200" r="3" fill="{c}"/>
-  <circle cx="350" cy="200" r="3" fill="{c}"/>
-
-  <!-- Maloca grande (triângulo + base) -->
-  <path d="M 200 90 L 290 215 L 110 215 Z" fill="{c}"/>
-  <ellipse cx="200" cy="240" rx="98" ry="38" fill="{c}"/>
-
-  <!-- Palmeiras silhueta verde escuro -->
-  <g fill="{VERDE_PRETO}">
-    <!-- esquerda -->
-    <rect x="148" y="155" width="2.5" height="55" fill="{VERDE_PRETO}"/>
-    <path d="M 149 160 Q 130 148 120 152 Q 132 158 149 160 Z" fill="{VERDE_PRETO}"/>
-    <path d="M 149 165 Q 130 162 118 167 Q 135 168 149 165 Z" fill="{VERDE_PRETO}"/>
-    <path d="M 149 170 Q 132 175 122 184 Q 138 175 149 170 Z" fill="{VERDE_PRETO}"/>
-    <path d="M 149 158 Q 160 145 175 145 Q 162 155 149 158 Z" fill="{VERDE_PRETO}"/>
-    <path d="M 149 164 Q 162 162 177 165 Q 163 168 149 164 Z" fill="{VERDE_PRETO}"/>
-    <path d="M 149 170 Q 162 174 175 184 Q 158 175 149 170 Z" fill="{VERDE_PRETO}"/>
-    <!-- direita -->
-    <rect x="250" y="155" width="2.5" height="55" fill="{VERDE_PRETO}"/>
-    <path d="M 251 160 Q 270 148 280 152 Q 268 158 251 160 Z" fill="{VERDE_PRETO}"/>
-    <path d="M 251 165 Q 270 162 282 167 Q 265 168 251 165 Z" fill="{VERDE_PRETO}"/>
-    <path d="M 251 170 Q 268 175 278 184 Q 262 175 251 170 Z" fill="{VERDE_PRETO}"/>
-    <path d="M 251 158 Q 240 145 225 145 Q 238 155 251 158 Z" fill="{VERDE_PRETO}"/>
-    <path d="M 251 164 Q 238 162 223 165 Q 237 168 251 164 Z" fill="{VERDE_PRETO}"/>
-    <path d="M 251 170 Q 238 174 225 184 Q 242 175 251 170 Z" fill="{VERDE_PRETO}"/>
+  <!-- Jacamim em negativo -->
+  <g fill="{m}">
+    <ellipse cx="205" cy="200" rx="26" ry="15"/>
+    <path d="M 218 192 Q 224 168 230 160 L 236 162 Q 228 180 224 200 Z"/>
+    <circle cx="234" cy="158" r="8"/>
+    <polygon points="241,155 256,153 241,162"/>
+    <rect x="194" y="212" width="2.5" height="14" rx="1"/>
+    <rect x="210" y="212" width="2.5" height="14" rx="1"/>
+    <path d="M 180 200 Q 168 194 160 198 Q 172 206 180 200 Z"/>
   </g>
-
-  <!-- Jacamim (silhueta da ave) -->
-  <g fill="{VERDE_PRETO}">
-    <ellipse cx="210" cy="195" rx="22" ry="14"/>
-    <ellipse cx="220" cy="172" rx="6" ry="18" transform="rotate(10 220 172)"/>
-    <circle cx="225" cy="155" r="7"/>
-    <polygon points="232,153 244,151 232,158"/>
-    <line x1="200" y1="208" x2="198" y2="220" stroke="{VERDE_PRETO}" stroke-width="2.5"/>
-    <line x1="215" y1="208" x2="215" y2="220" stroke="{VERDE_PRETO}" stroke-width="2.5"/>
-    <path d="M 188 195 Q 178 188 170 192 Q 180 200 188 195 Z"/>
-  </g>
-
-  <!-- Texto UNIVAJA na faixa -->
-  <text x="200" y="252" font-family="Battambang, Archivo, serif" font-size="38" font-weight="700"
-        fill="white" text-anchor="middle" letter-spacing="4">UNIVAJA</text>
-
-  <!-- Texto curvado superior -->
-  <text font-family="Battambang, Archivo, serif" font-size="22" font-weight="700"
-        fill="{c}" letter-spacing="5">
-    <textPath href="#t-cima-{tamanho}" startOffset="50%" text-anchor="middle">
-      UNIÃO DOS POVOS INDÍGENAS
-    </textPath>
-  </text>
-
-  <!-- Texto curvado inferior -->
-  <text font-family="Battambang, Archivo, serif" font-size="22" font-weight="700"
-        fill="{c}" letter-spacing="5">
-    <textPath href="#t-baixo-{tamanho}" startOffset="50%" text-anchor="middle">
-      VALE DO JAVARI
-    </textPath>
-  </text>
 </svg>"""
 
 
@@ -1067,16 +1023,21 @@ h4, h5, h6 {{
 
 
 def header(titulo: str, sub: str = "", meta: str = "Uso interno · 2026") -> str:
-    """Header com selo UNIVAJA oficial + nome do app."""
-    # Selo branco para contraste no header vermelho
-    selo = logo_univaja_selo(tamanho=110, cor="white")
+    """Header: emblema em cor primária sobre disco branco + wordmark em HTML."""
+    # Emblema na COR PRIMÁRIA, sobre um disco branco para contraste no header vermelho
+    selo = logo_univaja_selo(tamanho=92, cor=PRIMARIA, miolo='white')
 
     return f"""
 <div class="header-univaja">
-    <div class="header-univaja-conteudo" style="display:flex;align-items:center;gap:22px">
-        <div style="background:rgba(255,255,255,.08);border-radius:50%;padding:6px;flex-shrink:0">{selo}</div>
+    <div class="header-univaja-conteudo" style="display:flex;align-items:center;gap:20px">
+        <div style="background:white;border-radius:50%;padding:10px;flex-shrink:0;
+                    box-shadow:0 4px 14px rgba(0,0,0,.18);line-height:0">{selo}</div>
         <div>
-            <div class="header-univaja-app">{titulo}</div>
+            <div style="font-family:'Battambang','Archivo',serif;font-weight:700;font-size:30px;
+                        letter-spacing:3px;line-height:1;color:white">UNIVAJA</div>
+            <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:600;
+                        opacity:.9;margin-top:5px;color:white">União dos Povos Indígenas · Vale do Javari</div>
+            <div class="header-univaja-app" style="margin-top:10px">{titulo}</div>
             <div class="header-univaja-sub">{sub}</div>
         </div>
     </div>
@@ -1158,9 +1119,17 @@ def eh_pauta_sensivel(*textos) -> bool:
 
 
 def sidebar_logo() -> str:
-    """Selo UNIVAJA oficial na sidebar."""
+    """Emblema UNIVAJA (cor primária) + wordmark em HTML na sidebar."""
     return f"""<div class="sidebar-logo">
-        {logo_univaja_selo(tamanho=140, cor=PRIMARIA)}
+        {logo_univaja_selo(tamanho=120, cor=PRIMARIA, miolo='white')}
+        <div style="text-align:center;margin-top:10px">
+            <div style="font-family:'Battambang','Archivo',serif;font-weight:700;font-size:22px;
+                        color:{PRIMARIA};letter-spacing:4px;line-height:1">UNIVAJA</div>
+            <div style="font-family:'Archivo',sans-serif;font-size:8.5px;letter-spacing:1.2px;
+                        text-transform:uppercase;color:{VERDE_ESC};margin-top:5px;line-height:1.4">
+                União dos Povos Indígenas<br>Vale do Javari
+            </div>
+        </div>
     </div>"""
 
 
