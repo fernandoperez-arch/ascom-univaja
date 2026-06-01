@@ -538,10 +538,62 @@ elif pagina == "🗓️ Calendário editorial":
                         st.success(f"✅ '{c['titulo']}' virou pauta!")
                         st.rerun()
 
-    else:  # Lista
-        pautas_ord = sorted(pautas, key=lambda x: (x.get("data",""), x.get("hora","")))
-        st.caption(f"{len(pautas_ord)} pauta(s)")
-        for p in pautas_ord:
+    else:  # Lista — pautas + datas comemorativas intercaladas por dia
+        ano_ref = st.session_state.get("cal_ano", date.today().year)
+
+        # Monta lista unificada
+        itens = [{"tipo": "pauta", "data": p.get("data", ""), "obj": p} for p in pautas]
+        ids_existentes = {(p.get("titulo"), p.get("data")) for p in data.listar()}
+        for e in di.DATAS_UNIVAJA:
+            try:
+                mm, dd = int(e["data"][:2]), int(e["data"][3:])
+                d_iso = date(ano_ref, mm, dd).isoformat()
+            except Exception:
+                continue
+            # se a data já virou pauta, não duplica o marcador
+            if (e["titulo"], d_iso) in ids_existentes:
+                continue
+            itens.append({"tipo": "comem", "data": d_iso, "obj": e})
+
+        itens.sort(key=lambda x: x["data"])
+        st.caption(f"{len(pautas)} pauta(s) + datas comemorativas do ano {ano_ref} · 🔴 fixas")
+
+        for it in itens:
+            if it["tipo"] == "comem":
+                c = it["obj"]
+                cor_c = PRIMARIA if c["sensivel"] else VERDE
+                marca = "⚠️ SENSÍVEL · " if c["sensivel"] else "🔴 DATA FIXA · "
+                try:
+                    dlabel = datetime.fromisoformat(it["data"]).strftime("%d/%m/%Y")
+                except Exception:
+                    dlabel = it["data"]
+                cca, ccb = st.columns([4.5, 1.3])
+                cca.markdown(
+                    f"<div style='background:{cor_c}0d;border:1.5px dashed {cor_c};border-radius:10px;"
+                    f"padding:10px 14px;margin-bottom:8px'>"
+                    f"<b style='color:{cor_c}'>📅 {dlabel}</b> · "
+                    f"<b style='color:{VERDE_PRETO}'>{c['titulo']}</b> "
+                    f"<span style='font-size:11px;color:{cor_c};font-weight:700'>· {marca}{c['formato']}</span><br>"
+                    f"<span style='font-size:12px;color:{CINZA};font-style:italic'>💡 {c['sugestao'][:170]}{'…' if len(c['sugestao'])>170 else ''}</span>"
+                    f"</div>", unsafe_allow_html=True)
+                if ccb.button("➕ Virar pauta", key=f"vp_lista_{it['data']}_{c['titulo'][:10]}",
+                              use_container_width=True):
+                    novap = data.nova_pauta()
+                    fmt = c["formato"].split("/")[0].split("(")[0].strip() or "Card único"
+                    novap.update({
+                        "titulo": c["titulo"], "descricao": c["sugestao"], "data": it["data"],
+                        "formato": fmt, "status": "💡 Ideia", "prioridade": c["prioridade"],
+                        "campanha": "Datas comemorativas", "objetivo": c["categoria"],
+                        "obs_internas": ("⚠️ TEMA SENSÍVEL — validar com Coordenação + Procuradoria. "
+                                         if c["sensivel"] else "") + "Data fixa do calendário UNIVAJA.",
+                    })
+                    data.salvar(novap)
+                    st.success(f"✅ '{c['titulo']}' virou pauta!")
+                    st.rerun()
+                continue
+
+            # item == pauta
+            p = it["obj"]
             sincronizada = bool(p.get("gcal_event_id"))
             st.markdown(linha_pauta(p), unsafe_allow_html=True)
             cols = st.columns([1.1, 0.7, 2.2, 2.6, 1.4])
@@ -555,7 +607,6 @@ elif pagina == "🗓️ Calendário editorial":
                 data.remover(p["id"]); st.rerun()
 
             if gcal.esta_configurado():
-                # Sincronização real com lembretes 15/7 dias
                 label = "🔄 Resincronizar" if sincronizada else "📆 Agendar (15/7d)"
                 if cols[2].button(label, key=f"sync_{p['id']}",
                                   help="Cria/atualiza o evento na Google Agenda com lembretes de 15 e 7 dias"):
@@ -572,7 +623,6 @@ elif pagina == "🗓️ Calendário editorial":
                         f"<span style='font-size:11px;color:{VERDE};font-weight:600'>✓ na Google Agenda</span>",
                         unsafe_allow_html=True)
             else:
-                # Fallback: link simples (sem credenciais)
                 url_ag = link_google_agenda(p)
                 cols[2].markdown(
                     f'<a href="{url_ag}" target="_blank" style="display:inline-block;background:white;'
