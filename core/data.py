@@ -43,6 +43,7 @@ def nova_pauta() -> dict:
         "obs_pos": "",
         "obs_revisao": "",
         "metricas": {"impressoes": 0, "comentarios": 0, "cliques": 0},
+        "gcal_event_id": "",   # id do evento no Google Agenda (espelho)
         "criado_em": datetime.now().isoformat(),
         "criado_por": st.session_state.get("auth_user", ""),
     }

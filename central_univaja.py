@@ -20,6 +20,8 @@ from univaja_brand import (
 )
 from core import auth, data
 from core import workflow as wf
+from core import datas_importantes as di
+from core import calendar_api as gcal
 from core.calendar_link import link_google_agenda
 
 # ─── Config ───────────────────────────────────────────────────────────────────
@@ -83,6 +85,37 @@ with st.sidebar:
             except Exception as ex:
                 st.error(f"Erro: {ex}")
 
+    st.markdown("---")
+    st.markdown("##### 📆 Google Agenda")
+    if gcal.esta_configurado():
+        st.caption("✅ Conectada. Os eventos saem com lembretes de 15 e 7 dias.")
+    else:
+        st.caption("⚠️ Não configurada — usando o botão de link simples.")
+        with st.expander("🔧 Como ativar lembretes 15/7 dias"):
+            st.markdown(
+                "1. Google Cloud → ative a **Calendar API** e crie uma **conta de serviço**.\n"
+                "2. Compartilhe a agenda da `imprensa@univaja.org` com o e-mail da conta de "
+                "serviço (permissão **fazer alterações**).\n"
+                "3. Cole o JSON em **Settings → Secrets** como `[gcp_service_account]` "
+                "e `[gcal] calendar_id`.\n\n"
+                "Detalhes no `README_CENTRAL.md`."
+            )
+
+    st.markdown("---")
+    st.markdown("##### 📅 Calendário de datas")
+    st.caption("Datas comemorativas dos povos e da UNIVAJA, já com sugestão de post.")
+    ano_seed = st.number_input("Ano", min_value=2024, max_value=2035,
+                               value=date.today().year, step=1, key="ano_seed")
+    if st.button("📌 Carregar datas UNIVAJA na agenda", use_container_width=True):
+        novas = di.como_pautas(int(ano_seed))
+        existentes = {(p["titulo"], p["data"]) for p in data.listar()}
+        add = 0
+        for p in novas:
+            if (p["titulo"], p["data"]) not in existentes:
+                data.salvar(p); add += 1
+        st.success(f"✅ {add} data(s) adicionada(s) como pauta!")
+        st.rerun()
+
     if not data.listar():
         if st.button("✨ Carregar exemplos", use_container_width=True):
             data.carregar_exemplos()
@@ -136,6 +169,26 @@ def linha_pauta(p, contexto=""):
 # ══════════════════════════════════════════════════════════════════════════════
 if pagina == "📊 Dashboard":
     st.markdown(section_title("Dashboard editorial", "padrao"), unsafe_allow_html=True)
+
+    # ── Datas comemorativas UNIVAJA nos próximos 60 dias (sempre visível) ──
+    prox_datas = di.proximas(dias=60)
+    if prox_datas:
+        st.markdown("##### 📅 Datas comemorativas chegando (calendário UNIVAJA)")
+        chips = []
+        for dias_r, dt, e in prox_datas[:6]:
+            cor = PRIMARIA if e["sensivel"] else VERDE
+            quando = "hoje" if dias_r == 0 else (f"em {dias_r}d")
+            alerta = " ⚠️" if e["sensivel"] else ""
+            chips.append(
+                f"<div style='display:inline-block;background:white;border:1px solid {cor};"
+                f"border-left:4px solid {cor};border-radius:8px;padding:6px 12px;margin:0 6px 6px 0'>"
+                f"<span style='font-weight:700;color:{cor};font-size:12px'>{dt.strftime('%d/%m')}</span> "
+                f"<span style='font-size:12px;color:{VERDE_PRETO}'>{e['titulo'][:42]}{alerta}</span> "
+                f"<span style='font-size:10px;color:{CINZA}'>· {quando}</span></div>"
+            )
+        st.markdown("".join(chips), unsafe_allow_html=True)
+        st.caption("Use **📌 Carregar datas UNIVAJA** na barra lateral para virar pauta com 1 clique.")
+        st.markdown(divisor("pontos"), unsafe_allow_html=True)
 
     pautas = data.listar()
     if not pautas:
@@ -320,6 +373,22 @@ elif pagina == "➕ Cadastro de pauta":
 elif pagina == "🗓️ Calendário editorial":
     st.markdown(section_title("Calendário editorial", "padrao"), unsafe_allow_html=True)
 
+    if gcal.esta_configurado():
+        agendadas = [p for p in data.listar() if "Agendado" in p.get("status", "")]
+        pendentes = [p for p in agendadas if not p.get("gcal_event_id")]
+        ccol1, ccol2 = st.columns([3, 1])
+        ccol1.caption(f"📆 Google Agenda conectada · {len(agendadas)} agendada(s), "
+                      f"{len(pendentes)} ainda não sincronizada(s).")
+        if pendentes and ccol2.button("📆 Sincronizar agendadas", use_container_width=True,
+                                      help="Cria os eventos com lembretes de 15 e 7 dias"):
+            ok = 0
+            for p in pendentes:
+                r = gcal.sincronizar(p)
+                if r["ok"]:
+                    p["gcal_event_id"] = r["event_id"]; data.salvar(p); ok += 1
+            st.success(f"✅ {ok} evento(s) criado(s) com lembretes 15/7 dias!")
+            st.rerun()
+
     # Filtros via form (sem reruns a cada clique)
     with st.expander("🔍 Filtros", expanded=True):
         with st.form("form_filtros"):
@@ -410,20 +479,43 @@ elif pagina == "🗓️ Calendário editorial":
         pautas_ord = sorted(pautas, key=lambda x: (x.get("data",""), x.get("hora","")))
         st.caption(f"{len(pautas_ord)} pauta(s)")
         for p in pautas_ord:
+            sincronizada = bool(p.get("gcal_event_id"))
             st.markdown(linha_pauta(p), unsafe_allow_html=True)
-            cols = st.columns([1.2, 0.8, 2.5, 3.5])
+            cols = st.columns([1.1, 0.7, 2.2, 2.6, 1.4])
             if cols[0].button("✏️ Editar", key=f"ed_{p['id']}"):
                 st.session_state.editar_id = p["id"]
                 st.session_state["_pending_nav"] = "➕ Cadastro de pauta"
                 st.rerun()
             if cols[1].button("🗑️", key=f"rm_{p['id']}", help="Remover"):
+                if sincronizada:
+                    gcal.remover(p)
                 data.remover(p["id"]); st.rerun()
-            url_ag = link_google_agenda(p)
-            cols[2].markdown(
-                f'<a href="{url_ag}" target="_blank" style="display:inline-block;background:white;'
-                f'border:1px solid {VERDE_CLARO};color:{VERDE_PRETO};padding:5px 10px;border-radius:8px;'
-                f'text-decoration:none;font-size:12px;font-weight:600">📅 Google Agenda</a>',
-                unsafe_allow_html=True)
+
+            if gcal.esta_configurado():
+                # Sincronização real com lembretes 15/7 dias
+                label = "🔄 Resincronizar" if sincronizada else "📆 Agendar (15/7d)"
+                if cols[2].button(label, key=f"sync_{p['id']}",
+                                  help="Cria/atualiza o evento na Google Agenda com lembretes de 15 e 7 dias"):
+                    r = gcal.sincronizar(p)
+                    if r["ok"]:
+                        p["gcal_event_id"] = r["event_id"]
+                        data.salvar(p)
+                        st.success("✅ Sincronizado com lembretes 15/7 dias!")
+                        st.rerun()
+                    else:
+                        st.error(f"Erro: {r['erro']}")
+                if sincronizada:
+                    cols[3].markdown(
+                        f"<span style='font-size:11px;color:{VERDE};font-weight:600'>✓ na Google Agenda</span>",
+                        unsafe_allow_html=True)
+            else:
+                # Fallback: link simples (sem credenciais)
+                url_ag = link_google_agenda(p)
+                cols[2].markdown(
+                    f'<a href="{url_ag}" target="_blank" style="display:inline-block;background:white;'
+                    f'border:1px solid {VERDE_CLARO};color:{VERDE_PRETO};padding:5px 10px;border-radius:8px;'
+                    f'text-decoration:none;font-size:12px;font-weight:600">📅 Google Agenda</a>',
+                    unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

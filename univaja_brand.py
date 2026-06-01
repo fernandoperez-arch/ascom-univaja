@@ -994,8 +994,58 @@ h4, h5, h6 {{
 [data-testid="stSidebar"] h1,
 [data-testid="stSidebar"] h2,
 [data-testid="stSidebar"] h3 {{ color: white; }}
-[data-testid="stSidebar"] .stCheckbox label {{ color: {CREME} !important; font-size: 13px; }}
+[data-testid="stSidebar"] .stCheckbox label,
+[data-testid="stSidebar"] .stRadio label,
+[data-testid="stSidebar"] label {{ color: {CREME} !important; font-size: 13px; }}
 [data-testid="stSidebar"] hr {{ border-color: {VERDE_ESC}; }}
+
+/* Legendas (st.caption) legíveis sobre o verde escuro */
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"],
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] * {{
+    color: #cdd8ce !important;
+}}
+
+/* Botão de download: vermelho UNIVAJA com texto branco (estava ilegível) */
+[data-testid="stSidebar"] .stDownloadButton button {{
+    background: {PRIMARIA} !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 600 !important;
+}}
+[data-testid="stSidebar"] .stDownloadButton button * {{ color: #ffffff !important; }}
+[data-testid="stSidebar"] .stDownloadButton button:hover {{ background: {VERMELHO_ESC} !important; }}
+
+/* Botões normais na sidebar: vermelho com texto branco */
+[data-testid="stSidebar"] .stButton button {{
+    background: {PRIMARIA} !important;
+    color: #ffffff !important;
+    border: none !important;
+}}
+[data-testid="stSidebar"] .stButton button * {{ color: #ffffff !important; }}
+
+/* Área de upload: fundo claro com texto escuro legível */
+[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {{
+    background: rgba(255,255,255,.95) !important;
+    border: 1px dashed {VERDE_CLARO} !important;
+}}
+[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] *,
+[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] * {{
+    color: {VERDE_PRETO} !important;
+}}
+/* Botão 'Browse files' dentro do uploader */
+[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button {{
+    background: {VERDE_PRETO} !important;
+    color: #ffffff !important;
+    border: none !important;
+}}
+[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button * {{ color:#ffffff !important; }}
+
+/* Texto/inputs de campos na sidebar legíveis */
+[data-testid="stSidebar"] input,
+[data-testid="stSidebar"] .stTextInput input {{
+    color: {VERDE_PRETO} !important;
+    background: #ffffff !important;
+}}
 
 /* Logo na sidebar — selo UNIVAJA oficial */
 .sidebar-logo {{
