@@ -455,6 +455,18 @@ elif pagina == "🗓️ Calendário editorial":
             except Exception:
                 pass
 
+        # Camada fixa: datas comemorativas UNIVAJA do mês exibido
+        comem_por_dia = {}
+        for e in di.DATAS_UNIVAJA:
+            try:
+                mm, dd = int(e["data"][:2]), int(e["data"][3:])
+                if mm == st.session_state.cal_mes:
+                    comem_por_dia.setdefault(dd, []).append(e)
+            except Exception:
+                pass
+
+        st.caption("🔴 datas comemorativas (fixas) · ⚠️ tema sensível · barras coloridas = pautas")
+
         _cal.setfirstweekday(_cal.SUNDAY)
         semanas = _cal.monthcalendar(st.session_state.cal_ano, st.session_state.cal_mes)
         dias_lbl = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"]
@@ -463,17 +475,68 @@ elif pagina == "🗓️ Calendário editorial":
         for sem in semanas:
             for dia in sem:
                 if dia == 0:
-                    cels.append("<div style='min-height:78px'></div>"); continue
+                    cels.append("<div style='min-height:88px'></div>"); continue
+                comems = comem_por_dia.get(dia, [])
                 evs = por_dia.get(dia, [])
-                ev_html = ""
-                for e in evs[:3]:
+                inner = ""
+                # datas comemorativas primeiro (camada fixa, estilo destacado)
+                for c in comems:
+                    cor_c = PRIMARIA if c["sensivel"] else VERDE
+                    mark = "⚠️ " if c["sensivel"] else "🔴 "
+                    inner += (f"<div title='{c['titulo']}' style='background:{cor_c}1a;color:{cor_c};"
+                              f"border:1px solid {cor_c};font-size:9px;padding:2px 4px;border-radius:3px;"
+                              f"margin-top:2px;line-height:1.2;font-weight:700;overflow:hidden;"
+                              f"white-space:nowrap;text-overflow:ellipsis'>{mark}{c['titulo'][:16]}</div>")
+                # pautas depois
+                for e in evs[:2]:
                     cor = wf.cor_status(e["status"])
-                    ev_html += f"<div style='background:{cor};color:white;font-size:9px;padding:2px 4px;border-radius:3px;margin-top:2px;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis'>{e['titulo'][:18]}</div>"
-                if len(evs) > 3:
-                    ev_html += f"<div style='font-size:9px;color:{CINZA}'>+{len(evs)-3}</div>"
-                bg = "#fff" if not evs else CREME
-                cels.append(f"<div style='background:{bg};border:1px solid #e5e7eb;border-radius:6px;padding:4px 5px;min-height:78px'><div style='font-weight:700;font-size:13px;color:{VERDE_PRETO}'>{dia}</div>{ev_html}</div>")
+                    inner += (f"<div style='background:{cor};color:white;font-size:9px;padding:2px 4px;"
+                              f"border-radius:3px;margin-top:2px;line-height:1.2;overflow:hidden;"
+                              f"white-space:nowrap;text-overflow:ellipsis'>{e['titulo'][:16]}</div>")
+                if len(evs) > 2:
+                    inner += f"<div style='font-size:9px;color:{CINZA}'>+{len(evs)-2} pauta(s)</div>"
+                # destaque do dia quando há data comemorativa
+                if comems:
+                    cor_b = PRIMARIA if any(c["sensivel"] for c in comems) else VERDE
+                    bg, borda = f"{cor_b}0d", f"2px solid {cor_b}"
+                else:
+                    bg, borda = ("#fff" if not evs else CREME), "1px solid #e5e7eb"
+                cels.append(f"<div style='background:{bg};border:{borda};border-radius:6px;padding:4px 5px;min-height:88px'><div style='font-weight:700;font-size:13px;color:{VERDE_PRETO}'>{dia}</div>{inner}</div>")
         st.markdown(f"<div style='display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:10px'>{hdr}{''.join(cels)}</div>", unsafe_allow_html=True)
+
+        # Resumo das datas comemorativas do mês + botão para virar pauta
+        if comem_por_dia:
+            st.markdown(divisor("pontos"), unsafe_allow_html=True)
+            st.markdown("##### 🔴 Datas comemorativas deste mês")
+            for dd in sorted(comem_por_dia):
+                for c in comem_por_dia[dd]:
+                    cor_c = PRIMARIA if c["sensivel"] else VERDE
+                    marca = "⚠️ SENSÍVEL · " if c["sensivel"] else ""
+                    cc1, cc2 = st.columns([5, 1.2])
+                    cc1.markdown(
+                        f"<div style='background:white;border-left:4px solid {cor_c};border-radius:8px;"
+                        f"padding:8px 12px;margin-bottom:6px'>"
+                        f"<b style='color:{cor_c}'>{dd:02d}/{st.session_state.cal_mes:02d}</b> · "
+                        f"<b style='color:{VERDE_PRETO}'>{c['titulo']}</b> "
+                        f"<span style='font-size:11px;color:{CINZA}'>· {marca}{c['formato']}</span><br>"
+                        f"<span style='font-size:12px;color:{CINZA};font-style:italic'>💡 {c['sugestao'][:160]}{'…' if len(c['sugestao'])>160 else ''}</span>"
+                        f"</div>", unsafe_allow_html=True)
+                    # chave única por data+titulo
+                    k = f"comem_{st.session_state.cal_ano}_{st.session_state.cal_mes}_{dd}_{c['titulo'][:10]}"
+                    if cc2.button("➕ Virar pauta", key=k, use_container_width=True):
+                        novap = data.nova_pauta()
+                        fmt = c["formato"].split("/")[0].split("(")[0].strip() or "Card único"
+                        novap.update({
+                            "titulo": c["titulo"], "descricao": c["sugestao"],
+                            "data": date(st.session_state.cal_ano, st.session_state.cal_mes, dd).isoformat(),
+                            "formato": fmt, "status": "💡 Ideia", "prioridade": c["prioridade"],
+                            "campanha": "Datas comemorativas", "objetivo": c["categoria"],
+                            "obs_internas": ("⚠️ TEMA SENSÍVEL — validar com Coordenação + Procuradoria. "
+                                             if c["sensivel"] else "") + "Data fixa do calendário UNIVAJA.",
+                        })
+                        data.salvar(novap)
+                        st.success(f"✅ '{c['titulo']}' virou pauta!")
+                        st.rerun()
 
     else:  # Lista
         pautas_ord = sorted(pautas, key=lambda x: (x.get("data",""), x.get("hora","")))
